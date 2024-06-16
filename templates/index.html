@@ -310,7 +310,7 @@
             
             const holidays = [];
             
-            const holidaysSchedule = document.getElementById('holidaySchedule')
+            const holidaysSchedule = document.getElementById('holidaySchedule');
             holidaysSchedule.querySelectorAll('.date-range').forEach(holidayRange => {
                 const dateRange = holidayRange.value.split(" hasta ");
                 const start_date = dateRange[0];
@@ -319,12 +319,29 @@
                 
             });
 
+            // Manda los horarios excepcionales al programa Python
+
+            const unusuals = [];
+            const unusualSchedule = document.getElementById('unusualSchedule');
+
+            unusualSchedule.querySelectorAll('.interval').forEach(unusualWorkDay => {
+                const date = unusualWorkDay.querySelector(`input[name="specific-date"]`).value;
+                const start_time = unusualWorkDay.querySelector(`input[name="start-time"]`).value;
+                const end_time = unusualWorkDay.querySelector(`input[name="end-time"]`).value;
+
+                unusuals.push({ date, start_time, end_time });
+            });
+
+
+
+
+
             fetch('/process', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ start_date, end_date, schedule, holidays })
+                body: JSON.stringify({ start_date, end_date, schedule, unusuals, holidays})
             })
             .then(response => response.json())
             .then(data => {

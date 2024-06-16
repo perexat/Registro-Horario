@@ -24,16 +24,28 @@ def process():
     12: 'dic'
 }
     data = request.json
-    print('DATA:')
-    print(data)
     start_date = datetime.strptime(data.get('start_date'), '%d/%m/%Y')
     end_date = datetime.strptime(data.get('end_date'), '%d/%m/%Y')
     schedule = data.get('schedule', {})
+
+
+    ###################### Depuración #####
+    print('DATA:')
+    print(data)
+    print('-----')
     print('SCHEDULE:')
     print(schedule)
+    print('-----')
     holidays = data.get('holidays', {})
     print('HOLIDAYS:')
     print(holidays)
+    print('-----')
+    unusuals = data.get('unusuals', {})
+    print('UNUSUALS:')
+    print(unusuals)
+
+
+
 
     total_hours = 0
     current_date = start_date
