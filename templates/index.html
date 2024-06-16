@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Horas de Trabajo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+        .timepicker {
+            margin-bottom: 10px;
+        }
+        .interval {
+            margin-bottom: 10px;
+            margin-left: 30px;
+        }
+        .add-interval {
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+        .deleteButton {
+            width: 20px;
+            vertical-align: middle;
+            margin-left: 15px;
+        }
+        
+        input[type="text"] {
+            width: 300px;
+            
+        }
+        
+        h3 {
+            display: inline;
+        }
+        
+        button {
+            margin-bottom: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>Calculador de Horas de Trabajo</h1>
+    <form id="workForm">
+        <label for="date-range">Rango de Fechas:</label>
+        <input type="text" id="date-range" class="date-range" name="date-range"  required>
+        <br>
+        <h2>Horario de Trabajo</h2>
+        <div id="schedule">
+            <div class="day" id="monday">
+                <h3>Lunes:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('monday')">Agregar Intervalo</button>
+                <br>
+            </div>
+            <div class="day" id="tuesday">
+                <h3>Martes:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('tuesday')">Agregar Intervalo</button>
+                <br>
+            </div>
+            <div class="day" id="wednesday">
+                <h3>Miércoles:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('wednesday')">Agregar Intervalo</button>
+                <br>
+            </div>
+            <div class="day" id="thursday">
+                <h3>Jueves:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('thursday')">Agregar Intervalo</button>
+                <br>
+            </div>
+            <div class="day" id="friday">
+                <h3>Viernes:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('friday')">Agregar Intervalo</button>
+                <br>
+            </div>
+        </div>
+        <h2>Horarios Especiales</h2>
+            <div id="specialSchedule">
+                <div id="unusualSchedule">
+                    <button type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
+                </div>
+                <div id="holidaySchedule">
+                    <button type="button" id="addHoliday" onclick="addHolidayInterval()">Agregar Festivos</button>
+                </div>
+            </div>
+            <h2>Calcular totales</h2>
+            
+            <button type="submit">Calcular Horas</button>
+            <h3>Horas Totales: <span id="totalHours"></span></h3>
+    </form>
+    
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
+    <script>
+        flatpickr(".date-range", {
+            mode: "range",
+            dateFormat: "d/m/Y",
+            
+            
+            locale: {
+                rangeSeparator: " hasta ",
+                firstDayOfWeek: 1, // Establece que la semana comience en lunes
+                weekdays: {
+                    shorthand: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+                    longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+                },
+                months: {
+                    shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    longhand: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                }
+            }
+            
+            
+            
+            
+            
+        });
+
+        /*function addInterval(day) {
+            console.log("x:")
+            const container = document.getElementById(day);
+            const intervalDiv = document.createElement('div');
+            intervalDiv.className = 'interval';
+
+            const entrySelect = createSelect('entry', day);
+            const exitSelect = createSelect('exit', day);
+            
+            intervalDiv.appendChild(document.createTextNode('Entrada: '));
+            intervalDiv.appendChild(entrySelect);
+            intervalDiv.appendChild(document.createTextNode(' Salida: '));
+            intervalDiv.appendChild(exitSelect);
+            container.appendChild(intervalDiv);
+        } */
+        
+        function addDeleteButton() {
+            const deleteButton = document.createElement('img');
+            deleteButton.src = "{{ url_for('static', filename='img/delete.svg') }}"; // Ruta de la imagen que deseas utilizar
+            deleteButton.alt = 'Eliminar';
+            deleteButton.className= 'deleteButton';
+            deleteButton.addEventListener('click', function() {
+                deleteButton.parentNode.remove();
+            });
+            return deleteButton;
+        }
+        
+        function addInterval(day) {
+            
+            const container = document.getElementById(day);
+            const intervalDiv = document.createElement('div');
+            intervalDiv.className = 'interval';
+            
+            const entrySelect = createTimeInput('entry', day);
+            const exitSelect = createTimeInput('exit', day);
+            
+            /*const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Eliminar este intervalo';
+            deleteButton.addEventListener('click', function() {
+            container.removeChild(intervalDiv);
+            });*/
+            
+                      
+
+            intervalDiv.appendChild(document.createTextNode('Entrada: '));
+            intervalDiv.appendChild(entrySelect);
+            intervalDiv.appendChild(document.createTextNode(' Salida: '));
+            intervalDiv.appendChild(exitSelect);
+            
+            
+
+            intervalDiv.appendChild(addDeleteButton());
+            
+            
+            container.appendChild(intervalDiv);
+        }
+        
+        function createTimeInput(type, day) {
+            const timeInput = document.createElement('input');
+            timeInput.className = 'timepicker';
+            timeInput.type = 'time';
+            timeInput.name = `${day}-${type}`;
+            timeInput.required = true;
+            
+            return timeInput;
+        
+        }
+
+        /*function createSelect(type, day) {
+            const select = document.createElement('select');
+            select.className = 'timepicker';
+            select.name = `${day}-${type}`;
+
+            const minHour = 8; // Hora mínima (ejemplo: 08:00)
+            const maxHour = 18; // Hora máxima (ejemplo: 18:00)
+
+            // Agregar opciones al select con intervalos de 5 minutos
+            for (let hour = minHour; hour <= maxHour; hour++) {
+                for (let minute = 0; minute < 60; minute += 5) { // Intervalos de 5 minutos
+                    const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = time;
+                    select.appendChild(option);
+                }
+            }
+
+            return select;
+        }*/
+        
+        function addHolidayInterval() {
+            const specialSchedule = document.getElementById('holidaySchedule');
+            const holidayDiv = document.createElement('div');
+            holidayDiv.className = 'interval';
+    
+            const dateRangeInput = document.createElement('input');
+            dateRangeInput.type = 'text'; // Cambiar a 'text' en lugar de 'daterange'
+            dateRangeInput.name = 'holiday-range';
+            dateRangeInput.className= 'date-range';
+            dateRangeInput.required = true;
+            holidayDiv.appendChild(document.createTextNode('Rango de fechas festivas: '));
+            holidayDiv.appendChild(dateRangeInput);
+            
+            holidayDiv.appendChild(addDeleteButton());
+    
+            specialSchedule.appendChild(holidayDiv);
+    
+            // Inicializar Flatpickr en el nuevo input de rango de fechas
+            flatpickr(".date-range", {
+                mode: "range",
+                dateFormat: "d/m/Y",
+                locale: {
+                    rangeSeparator: " hasta ",
+                    firstDayOfWeek: 1, // Establece que la semana comience en lunes
+                    weekdays: {
+                        shorthand: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+                        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+                    },
+                    months: {
+                        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        longhand: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                    }
+                }
+
+            });
+        }
+        
+        function addUnusualTime() {
+            const specialSchedule = document.getElementById('unusualSchedule');
+            const specificTimeDiv = document.createElement('div');
+            specificTimeDiv.className = 'interval';
+    
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.name = 'specific-date';
+            dateInput.required = true;
+            specificTimeDiv.appendChild(document.createTextNode('Fecha: '));
+            specificTimeDiv.appendChild(dateInput);
+    
+            const startTimeInput = document.createElement('input');
+            startTimeInput.type = 'time';
+            startTimeInput.name = 'start-time';
+            startTimeInput.required = true;
+            specificTimeDiv.appendChild(document.createTextNode(' Hora de inicio: '));
+            specificTimeDiv.appendChild(startTimeInput);
+    
+            const endTimeInput = document.createElement('input');
+            endTimeInput.type = 'time';
+            endTimeInput.name = 'end-time';
+            endTimeInput.required = true;
+            specificTimeDiv.appendChild(document.createTextNode(' Hora de fin: '));
+            specificTimeDiv.appendChild(endTimeInput);
+            
+            specificTimeDiv.appendChild(addDeleteButton());
+    
+            specialSchedule.appendChild(specificTimeDiv);
+        }
+
+        document.getElementById('workForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const dateRange = document.getElementById('date-range').value.split(" hasta ");
+            const start_date = dateRange[0];
+            const end_date = dateRange[1];
+
+            const schedule = {};
+
+            // Procesa la fecha de inicio, la de final y el horario regular
+            
+            document.querySelectorAll('.day').forEach(day => {
+                const dayName = day.id;
+                schedule[dayName] = [];
+                day.querySelectorAll('.interval').forEach(interval => {
+                    const entry = interval.querySelector(`input[name="${dayName}-entry"]`).value;
+                    const exit = interval.querySelector(`input[name="${dayName}-exit"]`).value;
+                    schedule[dayName].push({ entry, exit });
+                });
+            });
+            
+            
+            // Manda los festivos al programa Python
+            
+            const holidays = [];
+            
+            const holidaysSchedule = document.getElementById('holidaySchedule')
+            holidaysSchedule.querySelectorAll('.date-range').forEach(holidayRange => {
+                const dateRange = holidayRange.value.split(" hasta ");
+                const start_date = dateRange[0];
+                const end_date = dateRange[1];
+                holidays.push([start_date , end_date]);
+                
+            });
+
+            fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ start_date, end_date, schedule, holidays })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalHours').textContent = data.total_hours.toFixed(2);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        
+
+    </script>
+</body>
+</html>
