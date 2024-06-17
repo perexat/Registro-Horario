@@ -199,11 +199,35 @@ button[type="submit"]:hover {
         </tbody>
     </table>
 
-    
+    <button id="download-btn">Descargar Tabla</button>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
+
+    <script>
+    document.getElementById('download-btn').addEventListener('click', function() {
+        // Obtener los datos de la tabla
+        var table = document.getElementById('scheduleTable');
+
+        // Crear un objeto Blob con los datos de la tabla en formato HTML
+        var htmlContent = '<html><head><title>Tabla Editable</title></head><body>' + table.outerHTML + '</body></html>';
+        var blob = new Blob([htmlContent], { type: 'text/html' });
+
+        // Crear un enlace de descarga
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'tabla_editable.html';
+
+        // Simular un clic en el enlace para iniciar la descarga
+        a.click();
+
+        // Liberar recursos
+        URL.revokeObjectURL(url);
+    });
+</script>
+
     <script>
         flatpickr(".date-range", {
             mode: "range",
