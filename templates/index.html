@@ -6,45 +6,134 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        label {
-            display: inline-block;
-            width: 100px;
-        }
-        .timepicker {
-            margin-bottom: 10px;
-        }
-        .interval {
-            margin-bottom: 10px;
-            margin-left: 30px;
-        }
-        .add-interval {
-            margin-left: 15px;
-            margin-bottom: 10px;
-        }
-        .deleteButton {
-            width: 20px;
-            vertical-align: middle;
-            margin-left: 15px;
-        }
-        
-        input[type="text"] {
-            width: 300px;
-            
-        }
-        
-        h3 {
-            display: inline;
-        }
-        
-        button {
-            margin-bottom: 10px;
-        }
+
+    .deleteButton {
+        width: 20px;
+        vertical-align: middle;
+        margin-left: 15px;
+    }
+
+
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 20px;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+form input[type="text"], form input[type="date"], form input[type="time"] {
+
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: inline-block; /* Mostrar en línea para que estén en la misma línea */
+    vertical-align: middle; /* Alinear verticalmente */
+    box-sizing: border-box; /* Incluir el padding y border en el ancho total */
+}
+
+form input[type="text"].date-range {
+
+}
+
+form h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#schedule {
+    margin-bottom: 20px;
+}
+
+.day {
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.day h3 {
+    color: #333;
+    margin-bottom: 5px;
+    display: inline-block; /* Alinear los títulos en línea con los botones */
+}
+
+.add-interval, #addUnusual, #addHoliday {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px; /* Añadir un margen izquierdo para separar los botones */
+}
+
+.add-interval:hover, #addUnusual:hover, #addHoliday:hover {
+    background-color: #45a049;
+}
+
+#specialSchedule, #holidaySchedule {
+    margin-bottom: 20px;
+}
+
+
+
+#scheduleTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#scheduleTable th, #scheduleTable td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+#scheduleTable th {
+    background-color: #f2f2f2;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
         
     </style>
 </head>
@@ -86,6 +175,7 @@
             <div id="specialSchedule">
                 <div id="unusualSchedule">
                     <button type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
+                    <p>El horario excepcional se añade al horario normal correspondiente al día de la semana.</p>
                 </div>
                 <div id="holidaySchedule">
                     <button type="button" id="addHoliday" onclick="addHolidayInterval()">Agregar Festivos</button>
@@ -94,8 +184,21 @@
             <h2>Calcular totales</h2>
             
             <button type="submit">Calcular Horas</button>
-            <h3>Horas Totales: <span id="totalHours"></span></h3>
-    </form>
+
+            <h1>Tabla de Horarios</h1>
+    <table id="scheduleTable">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Intervalos de Tiempo</th>
+                <th>Horas trabajadas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aquí se insertarán las filas dinámicamente -->
+        </tbody>
+    </table>
+
     
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -282,6 +385,26 @@
             specificTimeDiv.appendChild(addDeleteButton());
     
             specialSchedule.appendChild(specificTimeDiv);
+
+
+
+            flatpickr(dateInput, {
+                mode: "single",
+                dateFormat: "d/m/Y",
+                locale: {
+                    rangeSeparator: " hasta ",
+                    firstDayOfWeek: 1, // Establece que la semana comience en lunes
+                    weekdays: {
+                        shorthand: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+                        longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+                    },
+                    months: {
+                        shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        longhand: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                    }
+                }
+
+            });
         }
 
         document.getElementById('workForm').addEventListener('submit', function(e) {
@@ -345,9 +468,30 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('totalHours').textContent = data.total_hours.toFixed(2);
-            })
-            .catch(error => console.error('Error:', error));
+                    const tableBody = document.querySelector('#scheduleTable tbody');
+                    tableBody.innerHTML = ''; // Vacía la tabla antes de llenarla con los nuevos datos
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = item[0];
+                        row.appendChild(dateCell);
+
+                        const intervalsCell = document.createElement('td');
+                        item[1].forEach(interval => {
+                            const intervalText = document.createTextNode(`${interval[0]} - ${interval[1]}`);
+                            intervalsCell.appendChild(intervalText);
+                            intervalsCell.appendChild(document.createElement('br'));
+                        });
+                        row.appendChild(intervalsCell);
+
+                        const valueCell = document.createElement('td');
+                        valueCell.textContent = item[2];
+                        row.appendChild(valueCell);
+
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
         });
         
 
