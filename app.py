@@ -1,5 +1,8 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_file
 from datetime import datetime, timedelta
+from odf.opendocument import OpenDocumentText
+from odf.text import P
+from odf.table import Table, TableRow, TableCell, TableColumn
 
 app = Flask(__name__)
 
@@ -15,6 +18,50 @@ def is_date_in_range(date_str, date_range):
     # Verificar si la fecha está en el rango
     return start_date <= date_str <= end_date
 
+
+@app.route('/descargar_tabla_odt', methods=['POST'])
+def descargar_tabla_odt():
+    data = request.get_json()
+    table_html = data.get('tableHtml', '')
+
+    # Crear un archivo ODT con la tabla de tres columnas
+    odt_file = OpenDocumentText()
+    table = Table()
+
+    odt_file.text.addElement(table)
+
+    for i in range(3):
+        table_column = TableColumn()
+        table.addElement(table_column)
+
+    # Parsear el contenido HTML de la tabla y agregarlo a la tabla en el documento ODT
+    rows = table_html.split('</tr>')
+    for row in rows:
+        if '<tr>' in row:
+            table_row = TableRow()
+            print('-----Nueva fila-----')
+            table.addElement(table_row)
+            cells = row.split('</td>')
+            for cell in cells:
+                if '<td>' in cell:
+                    cell_content = cell.replace('<td>', '').strip()
+                    table_cell = TableCell()
+                    table_cell.addElement(P(text=cell_content))
+                    table_row.addElement(table_cell)
+                    print(f"Añadida celda con contenido: {cell_content.strip()}")
+
+
+    # Añadir celdas vacías si es necesario para completar las tres columnas en cada fila
+    for row in table.getElementsByType(TableRow):
+        while len(row.getElementsByType(TableCell)) < 3:
+            table_cell = TableCell()
+            table_cell.addElement(P(text=''))
+            row.addElement(table_cell)
+
+    odt_file.save("tabla_editable.odt")
+
+    # Enviar el archivo ODT como respuesta
+    return send_file("tabla_editable.odt", as_attachment=True)
 
 @app.route('/')
 def home():

@@ -199,6 +199,7 @@ button[type="submit"]:hover {
         </tbody>
     </table>
 
+    <button id="download-btn-html">Descargar Tabla HTML</button>
     <button id="download-btn">Descargar Tabla</button>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -206,7 +207,7 @@ button[type="submit"]:hover {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
 
     <script>
-    document.getElementById('download-btn').addEventListener('click', function() {
+    document.getElementById('download-btn-html').addEventListener('click', function() {
         // Obtener los datos de la tabla
         var table = document.getElementById('scheduleTable');
 
@@ -227,6 +228,40 @@ button[type="submit"]:hover {
         URL.revokeObjectURL(url);
     });
 </script>
+
+<script>
+        document.getElementById('download-btn').addEventListener('click', function() {
+            var tableHtml = document.getElementById('scheduleTable').outerHTML;
+            console.log(tableHtml);
+
+            // Enviar los datos de la tabla al backend
+            fetch('/descargar_tabla_odt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tableHtml: tableHtml })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Error al descargar el archivo.');
+            })
+            .then(blob => {
+                // Crear un enlace de descarga para el archivo ODT
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'tabla_editable.odt';
+                a.click();
+                URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
 
     <script>
         flatpickr(".date-range", {
