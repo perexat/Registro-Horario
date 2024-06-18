@@ -5,6 +5,7 @@ from odf.text import P, H
 from odf.table import Table, TableRow, TableCell, TableColumn
 from odf.style import Style, TextProperties, TableColumnProperties, TableRowProperties, TableCellProperties
 import re
+import webbrowser
 
 app = Flask(__name__)
 
@@ -249,4 +250,5 @@ def process():
     return jsonify(table_sumary)
 
 if __name__ == '__main__':
+    webbrowser.open('http://127.0.0.1:5000/')
     app.run(debug=True)
