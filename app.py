@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from odf.opendocument import OpenDocumentText
 from odf.text import P, H
 from odf.table import Table, TableRow, TableCell, TableColumn
+from odf.style import Style, TextProperties, TableColumnProperties, TableRowProperties, TableCellProperties
 import re
 
 app = Flask(__name__)
@@ -29,10 +30,54 @@ def is_date_in_range(date_str, date_range):
 @app.route('/descargar_tabla_odt', methods=['POST'])
 def descargar_tabla_odt():
     data = request.get_json()
+    print(data)
     table_html = data.get('tableHtml', '')
+    name = data.get('name', '')
+    empresa = data.get('empresa', '')
+    horascontrato = data.get('horascontrato', '')
+    date_range = str(data.get('daterange', ''))
+
 
     # Crear un archivo ODT con la tabla de tres columnas
     odt_file = OpenDocumentText()
+
+    # Crear un estilo de texto con color azul
+    style1 = Style(name="style1", family="paragraph")
+    style1_props = TextProperties(fontweight="bold", fontsize="18pt", color="#FFFFFF", backgroundcolor="#3465A4")
+    style1.addElement(style1_props)
+
+    # Crear un estilo de texto con color azul
+    style2 = Style(name="style2", family="paragraph")
+    style2_props = TextProperties(fontweight="bold", fontsize="12pt", color="#3465A4")
+    style2.addElement(style2_props)
+
+    # Agregar el estilo al documento
+    odt_file.automaticstyles.addElement(style2)
+    odt_file.automaticstyles.addElement(style1)
+
+
+    # Crear un estilo para la cabecera de la tabla
+    header_style = Style(name="HeaderStyle", family="table-cell")
+    header_cell_props = TableCellProperties(backgroundcolor="#b4c7dc", border="0.5pt solid #000000")
+    header_style.addElement(header_cell_props)
+
+    # Agregar el estilo al documento
+    odt_file.automaticstyles.addElement(header_style)
+
+    # Crear un estilo para el cuerpo de la tabla
+    body_style = Style(name="BodyStyle", family="table-cell")
+    body_cell_props = TableCellProperties(backgroundcolor="#FFFFFF", border="0.5pt solid #000000")
+    body_style.addElement(body_cell_props)
+
+    # Agregar el estilo al documento
+    odt_file.automaticstyles.addElement(header_style)
+
+
+    odt_file.text.addElement(H(outlinelevel=4, stylename=style1, text="Nombre: " + name))
+    odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Empresa: " + empresa))
+    odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Horas según contrato: " + horascontrato))
+    odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Rango de fechas: " + date_range))
+
     table = Table()
 
     odt_file.text.addElement(table)
@@ -62,7 +107,10 @@ def descargar_tabla_odt():
                         #cell_content = cell.replace('<td>', '').strip()
                         cell = cell.replace("<br>", "//")
                         cell_content = cleanhtml(cell)
-                        table_cell = TableCell()
+                        if table_section == thead:
+                            table_cell = TableCell(stylename=header_style)
+                        else:
+                            table_cell = TableCell(stylename=body_style)
                         for line in cell_content.split('//'):
                             paragraph = P(text=line)
                             table_cell.addElement(paragraph)
@@ -120,10 +168,8 @@ def process():
 }
     data = request.json
 
-
     # Datos de prueba
-    data = {'start_date': '01/06/2024', 'end_date': '30/06/2024', 'schedule': {'monday': [{'entry': '08:08', 'exit': '09:09'}], 'tuesday': [{'entry': '08:08', 'exit': '09:09'}, {'entry': '10:00', 'exit': '11:11'}], 'wednesday': [{'entry': '08:08', 'exit': '10:01'}], 'thursday': [], 'friday': [{'entry': '08:00', 'exit': '09:00'}]}, 'unusuals': [{'date': '04/06/2024', 'start_time': '15:00', 'end_time': '18:00'}, {'date': '07/06/2024', 'start_time': '15:00', 'end_time': '19:00'}], 'holidays': [['19/06/2024', '23/06/2024']]}
-    #data = {'start_date': '01/06/2024', 'end_date': '30/06/2024', 'schedule': {'monday': [{'entry': '08:00', 'exit': '09:00'}], 'tuesday': [{'entry': '08:00', 'exit': '10:00'}], 'wednesday': [{'entry': '08:00', 'exit': '09:00'}, {'entry': '11:00', 'exit': '12:00'}], 'thursday': [{'entry': '08:00', 'exit': '09:30'}], 'friday': [{'entry': '09:30', 'exit': '11:00'}]}, 'unusuals': [{'date': '05/06/2024', 'start_time': '15:00', 'end_time': '16:30'}, {'date': '12/06/2024', 'start_time': '15:00', 'end_time': '18:00'}], 'holidays': [['17/06/2024', '18/06/2024'], ['25/06/2024', '30/06/2024']]}
+    #data = {'start_date': '01/06/2024', 'end_date': '30/06/2024', 'schedule': {'monday': [{'entry': '08:08', 'exit': '09:09'}], 'tuesday': [{'entry': '08:08', 'exit': '09:09'}, {'entry': '10:00', 'exit': '11:11'}], 'wednesday': [{'entry': '08:08', 'exit': '10:01'}], 'thursday': [], 'friday': [{'entry': '08:00', 'exit': '09:00'}]}, 'unusuals': [{'date': '04/06/2024', 'start_time': '15:00', 'end_time': '18:00'}, {'date': '07/06/2024', 'start_time': '15:00', 'end_time': '19:00'}], 'holidays': [['19/06/2024', '23/06/2024']]}
 
     start_date = datetime.strptime(data.get('start_date'), '%d/%m/%Y')
     end_date = datetime.strptime(data.get('end_date'), '%d/%m/%Y')

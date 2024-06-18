@@ -56,8 +56,8 @@ form input[type="text"], form input[type="date"], form input[type="time"] {
     box-sizing: border-box; /* Incluir el padding y border en el ancho total */
 }
 
-form input[type="text"].date-range {
-
+form input[type="text"] {
+width: 300px;
 }
 
 form h2 {
@@ -140,6 +140,17 @@ button[type="submit"]:hover {
 <body>
     <h1>Calculador de Horas de Trabajo</h1>
     <form id="workForm">
+        <label for="name">Nombre:</label>
+            <input type="text" id="name" class="text" name="name"  required>
+        <label for="empresa">Empresa:</label>
+            <select id="empresa" id="empresa" name="empresa" required>
+                <option value="Colegio Sagrado Corazón">Colegio Sagrado Corazón</option>
+            </select>
+        <label for="horascontrato">Horas según contrato:</label>
+            <input type="number" id="horascontrato" class="text" name="horascontrato"  required>
+
+
+
         <label for="date-range">Rango de Fechas:</label>
         <input type="text" id="date-range" class="date-range" name="date-range"  required>
         <br>
@@ -200,7 +211,7 @@ button[type="submit"]:hover {
     </table>
 
     <button id="download-btn-html">Descargar Tabla HTML</button>
-    <button id="download-btn">Descargar ODT</button>
+    <button id="download-btn-odt">Descargar ODT</button>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -230,8 +241,12 @@ button[type="submit"]:hover {
 </script>
 
 <script>
-        document.getElementById('download-btn').addEventListener('click', function() {
+        document.getElementById('download-btn-odt').addEventListener('click', function() {
             var tableHtml = document.getElementById('scheduleTable').outerHTML;
+            const name = document.querySelector(`input[name="name"]`).value;
+            const empresa = document.querySelector(`select[name="empresa"]`).value;
+            const horascontrato = document.querySelector(`input[name="horascontrato"]`).value;
+            const daterange = document.querySelector(`input[name="date-range"]`).value;
             console.log(tableHtml);
 
             // Enviar los datos de la tabla al backend
@@ -240,7 +255,7 @@ button[type="submit"]:hover {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ tableHtml: tableHtml })
+                body: JSON.stringify({ name: name, empresa: empresa, horascontrato: horascontrato, daterange: daterange, tableHtml: tableHtml })
             })
             .then(response => {
                 if (response.ok) {
