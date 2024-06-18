@@ -1,10 +1,17 @@
 from flask import Flask, request, jsonify, render_template, send_file
 from datetime import datetime, timedelta
 from odf.opendocument import OpenDocumentText
-from odf.text import P
+from odf.text import P, H
 from odf.table import Table, TableRow, TableCell, TableColumn
+import re
 
 app = Flask(__name__)
+
+CLEANR = re.compile('<.*?>')
+
+def cleanhtml(raw_html):
+  cleantext = re.sub(CLEANR, '', raw_html)
+  return cleantext
 
 def is_date_in_range(date_str, date_range):
     # Convertir la fecha y el rango de fechas de strings a objetos datetime
@@ -35,20 +42,34 @@ def descargar_tabla_odt():
         table.addElement(table_column)
 
     # Parsear el contenido HTML de la tabla y agregarlo a la tabla en el documento ODT
-    rows = table_html.split('</tr>')
-    for row in rows:
-        if '<tr>' in row:
-            table_row = TableRow()
-            print('-----Nueva fila-----')
-            table.addElement(table_row)
-            cells = row.split('</td>')
-            for cell in cells:
-                if '<td>' in cell:
-                    cell_content = cell.replace('<td>', '').strip()
-                    table_cell = TableCell()
-                    table_cell.addElement(P(text=cell_content))
-                    table_row.addElement(table_cell)
-                    print(f"Añadida celda con contenido: {cell_content.strip()}")
+    thead = table_html.split('</thead>')[0]
+    tbody = table_html.split('</thead>')[1]
+
+
+    for table_section in [thead, tbody]:
+        rows = table_section.split('</tr>')
+        for row in rows:
+            if '<tr>' in row:
+                table_row = TableRow()
+                print('-----Nueva fila-----', row)
+                table.addElement(table_row)
+                if table_section == thead:
+                    cells = row.split('</th>')
+                else:
+                    cells = row.split('</td>')
+                for cell in cells:
+                    if '<td>' in cell or '<th>' in cell:
+                        #cell_content = cell.replace('<td>', '').strip()
+                        cell = cell.replace("<br>", "//")
+                        cell_content = cleanhtml(cell)
+                        table_cell = TableCell()
+                        for line in cell_content.split('//'):
+                            paragraph = P(text=line)
+                            table_cell.addElement(paragraph)
+                        #table_cell.addElement(P(text=cell_content))
+                        table_row.addElement(table_cell)
+                        print(f"Añadida celda con contenido: {cell_content.strip()}")
+
 
 
     # Añadir celdas vacías si es necesario para completar las tres columnas en cada fila
@@ -57,6 +78,20 @@ def descargar_tabla_odt():
             table_cell = TableCell()
             table_cell.addElement(P(text=''))
             row.addElement(table_cell)
+
+    # Sumamos el contenido de todas las celdas de la tercera columnas
+
+    total_hours = 0
+    saltar_primera_linea = True
+    for row in table.getElementsByType(TableRow):
+        cells = row.getElementsByType(TableCell)
+        if len(cells) >= 3:  # Verificar que la fila tenga al menos 3 celdas
+            cell_content = cells[2].firstChild
+            if cell_content is not None and not saltar_primera_linea:
+                total_hours += float(cell_content.firstChild.data)
+        saltar_primera_linea = False
+
+    odt_file.text.addElement(H(outlinelevel=4, text="Horas totales: " + str(round(total_hours, 2))))
 
     odt_file.save("tabla_editable.odt")
 
@@ -85,7 +120,9 @@ def process():
 }
     data = request.json
 
+
     # Datos de prueba
+    data = {'start_date': '01/06/2024', 'end_date': '30/06/2024', 'schedule': {'monday': [{'entry': '08:08', 'exit': '09:09'}], 'tuesday': [{'entry': '08:08', 'exit': '09:09'}, {'entry': '10:00', 'exit': '11:11'}], 'wednesday': [{'entry': '08:08', 'exit': '10:01'}], 'thursday': [], 'friday': [{'entry': '08:00', 'exit': '09:00'}]}, 'unusuals': [{'date': '04/06/2024', 'start_time': '15:00', 'end_time': '18:00'}, {'date': '07/06/2024', 'start_time': '15:00', 'end_time': '19:00'}], 'holidays': [['19/06/2024', '23/06/2024']]}
     #data = {'start_date': '01/06/2024', 'end_date': '30/06/2024', 'schedule': {'monday': [{'entry': '08:00', 'exit': '09:00'}], 'tuesday': [{'entry': '08:00', 'exit': '10:00'}], 'wednesday': [{'entry': '08:00', 'exit': '09:00'}, {'entry': '11:00', 'exit': '12:00'}], 'thursday': [{'entry': '08:00', 'exit': '09:30'}], 'friday': [{'entry': '09:30', 'exit': '11:00'}]}, 'unusuals': [{'date': '05/06/2024', 'start_time': '15:00', 'end_time': '16:30'}, {'date': '12/06/2024', 'start_time': '15:00', 'end_time': '18:00'}], 'holidays': [['17/06/2024', '18/06/2024'], ['25/06/2024', '30/06/2024']]}
 
     start_date = datetime.strptime(data.get('start_date'), '%d/%m/%Y')
@@ -130,7 +167,7 @@ def process():
                 entry_time = datetime.strptime(interval['entry'], '%H:%M')
                 exit_time = datetime.strptime(interval['exit'], '%H:%M')
                 table_today[1].append([entry_time.strftime('%-H:%M'),exit_time.strftime('%-H:%M')])
-                work_hours = round((exit_time - entry_time).seconds / 3600, 2)
+                work_hours = (exit_time - entry_time).seconds / 3600
                 total_hours_today += work_hours
 
 
@@ -140,18 +177,18 @@ def process():
                     entry_time = datetime.strptime(unusual_date['start_time'], '%H:%M')
                     exit_time = datetime.strptime(unusual_date['end_time'], '%H:%M')
                     table_today[1].append([entry_time.strftime('%-H:%M'),exit_time.strftime('%-H:%M')])
-                    work_hours = round((exit_time - entry_time).seconds / 3600, 2)
+                    work_hours = (exit_time - entry_time).seconds / 3600
                     total_hours_today += work_hours
 
 
 
 
-            table_today[2] += total_hours_today
+            table_today[2] += round(total_hours_today, 2)
             total_hours += total_hours_today
             if total_hours_today > 0:
                 table_sumary.append(table_today)
         current_date += timedelta(days=1)
-    table_sumary.append(['Total de horas trabajadas en el período: ',[],total_hours])
+    #table_sumary.append(['Total de horas trabajadas en el período: ',[],round(total_hours, 2)])
 
 
     '''print('TABLA RESUMEN')
