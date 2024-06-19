@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Calculadora de Horas de Trabajo</title>
+    <title>Generador de Registro de jornada laboral</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
     <style>
@@ -105,9 +105,11 @@ form h2 {
 
 
 #scheduleTable {
-    width: 100%;
+    width: 40%;
+    margin-left: 30%;
     border-collapse: collapse;
     margin-top: 20px;
+    display:none;
 }
 
 #scheduleTable th, #scheduleTable td {
@@ -134,7 +136,13 @@ button[type="submit"]:hover {
     background-color: #0056b3;
 }
 
-        
+p#total_hours {
+font-size: 150%;
+background-color: #f2f2f2;
+width: 40%;
+margin-left: 30%;
+text-align: center;
+}
     </style>
 </head>
 <body>
@@ -195,7 +203,7 @@ button[type="submit"]:hover {
             <h2>Calcular totales</h2>
             
             <button type="submit">Calcular Horas</button>
-
+            <p id="total_hours"> </p>
             <h1>Tabla de Horarios</h1>
     <table id="scheduleTable">
         <thead>
@@ -210,7 +218,7 @@ button[type="submit"]:hover {
         </tbody>
     </table>
 
-    <button id="download-btn-html">Descargar Tabla HTML</button>
+    <!-- <button id="download-btn-html">Descargar Tabla HTML</button> -->
     <button id="download-btn-odt">Descargar ODT</button>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -218,6 +226,7 @@ button[type="submit"]:hover {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
 
     <script>
+    /*
     document.getElementById('download-btn-html').addEventListener('click', function() {
         // Obtener los datos de la tabla
         var table = document.getElementById('scheduleTable');
@@ -238,6 +247,7 @@ button[type="submit"]:hover {
         // Liberar recursos
         URL.revokeObjectURL(url);
     });
+    */
 </script>
 
 <script>
@@ -247,7 +257,6 @@ button[type="submit"]:hover {
             const empresa = document.querySelector(`select[name="empresa"]`).value;
             const horascontrato = document.querySelector(`input[name="horascontrato"]`).value;
             const daterange = document.querySelector(`input[name="date-range"]`).value;
-            console.log(tableHtml);
 
             // Enviar los datos de la tabla al backend
             fetch('/descargar_tabla_odt', {
@@ -304,7 +313,6 @@ button[type="submit"]:hover {
         });
 
         /*function addInterval(day) {
-            console.log("x:")
             const container = document.getElementById(day);
             const intervalDiv = document.createElement('div');
             intervalDiv.className = 'interval';
@@ -542,9 +550,14 @@ button[type="submit"]:hover {
             })
             .then(response => response.json())
             .then(data => {
+
+                    const totalHours = document.querySelector('#total_hours');
+                    totalHours.textContent = 'El total de horas trabajadas es: ' + data.total_hours;
+
+
                     const tableBody = document.querySelector('#scheduleTable tbody');
                     tableBody.innerHTML = ''; // Vacía la tabla antes de llenarla con los nuevos datos
-                    data.forEach(item => {
+                    data.table_sumary.forEach(item => {
                         const row = document.createElement('tr');
                         const dateCell = document.createElement('td');
                         dateCell.textContent = item[0];
@@ -564,6 +577,7 @@ button[type="submit"]:hover {
 
                         tableBody.appendChild(row);
                     });
+                document.getElementById('scheduleTable').style.display = 'table';
                 })
                 .catch(error => console.error('Error:', error));
         });

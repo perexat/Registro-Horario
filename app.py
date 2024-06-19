@@ -31,7 +31,6 @@ def is_date_in_range(date_str, date_range):
 @app.route('/descargar_tabla_odt', methods=['POST'])
 def descargar_tabla_odt():
     data = request.get_json()
-    print(data)
     table_html = data.get('tableHtml', '')
     name = data.get('name', '')
     empresa = data.get('empresa', '')
@@ -97,7 +96,6 @@ def descargar_tabla_odt():
         for row in rows:
             if '<tr>' in row:
                 table_row = TableRow()
-                print('-----Nueva fila-----', row)
                 table.addElement(table_row)
                 if table_section == thead:
                     cells = row.split('</th>')
@@ -117,7 +115,6 @@ def descargar_tabla_odt():
                             table_cell.addElement(paragraph)
                         #table_cell.addElement(P(text=cell_content))
                         table_row.addElement(table_cell)
-                        print(f"Añadida celda con contenido: {cell_content.strip()}")
 
 
 
@@ -231,7 +228,7 @@ def process():
 
 
             table_today[2] += round(total_hours_today, 2)
-            total_hours += total_hours_today
+            total_hours = round(total_hours + total_hours_today, 2)
             if total_hours_today > 0:
                 table_sumary.append(table_today)
         current_date += timedelta(days=1)
@@ -247,7 +244,7 @@ def process():
         print('Total del dia: ', f'{int((day[2] * 60) // 60)}:{int((day[2] * 60) % 60)}')
     print(table_sumary)'''
 
-    return jsonify(table_sumary)
+    return jsonify({'total_hours': total_hours, 'table_sumary':table_sumary})
 
 if __name__ == '__main__':
     webbrowser.open('http://127.0.0.1:5000/')
