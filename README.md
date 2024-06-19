@@ -10,7 +10,7 @@ Añado al fichero de configuración /etc/nginx/sites-available/default las sigui
 
 location /registro-horario/ {
 
-        proxy_pass http://127.0.0.1:5000/;        
+        proxy_pass http://127.0.0.1:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -23,13 +23,13 @@ location /registro-horario/ {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
-    }
+}
 
 
 location /static {
 
         alias /var/www/Registro-Horario/static;  # Ruta absoluta a la carpeta static de tu proyecto Flask
-    }
+}
 
 location /process {
 
@@ -37,7 +37,7 @@ location /process {
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-    }
+}
 
 location /descargar_tabla_odt {
 
@@ -45,7 +45,7 @@ location /descargar_tabla_odt {
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-    }
+}
 
 
 Configuración de SYSTEMD
@@ -64,3 +64,4 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
+

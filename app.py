@@ -139,10 +139,10 @@ def descargar_tabla_odt():
 
     odt_file.text.addElement(H(outlinelevel=4, text="Horas totales: " + str(round(total_hours, 2))))
 
-    odt_file.save("tabla_editable.odt")
+    odt_file.save("/tmp/Registro_jornada_laboral.odt")
 
     # Enviar el archivo ODT como respuesta
-    return send_file("tabla_editable.odt", as_attachment=True)
+    return send_file("/tmp/Registro_jornada_laboral.odt", as_attachment=True)
 
 @app.route('/')
 def home():
@@ -247,5 +247,7 @@ def process():
     return jsonify({'total_hours': total_hours, 'table_sumary':table_sumary})
 
 if __name__ == '__main__':
-    webbrowser.open('http://127.0.0.1:5000/')
+    # Activar si se ejecuta en local
+    #webbrowser.open('http://127.0.0.1:5000/')
+
     app.run(debug=True)

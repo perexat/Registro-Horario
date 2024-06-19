@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Generador de Registro de jornada laboral</title>
+    <title>Registro jornada laboral</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
     <style>
@@ -103,13 +103,17 @@ form h2 {
 }
 
 
+div#results {
+display:none;
+}
+
 
 #scheduleTable {
     width: 40%;
     margin-left: 30%;
     border-collapse: collapse;
     margin-top: 20px;
-    display:none;
+
 }
 
 #scheduleTable th, #scheduleTable td {
@@ -146,13 +150,18 @@ text-align: center;
     </style>
 </head>
 <body>
-    <h1>Calculador de Horas de Trabajo</h1>
+    <h1>Generador de Registro de jornada laboral</h1>
     <form id="workForm">
         <label for="name">Nombre:</label>
             <input type="text" id="name" class="text" name="name"  required>
         <label for="empresa">Empresa:</label>
             <select id="empresa" id="empresa" name="empresa" required>
-                <option value="Colegio Sagrado Corazón">Colegio Sagrado Corazón</option>
+                <option value="Colegio Sagrado Corazón (Mislata)">Colegio Sagrado Corazón (Mislata)</option>
+                <option value="Colegio Sagrada Familia (Valencia)">Colegio Sagrada Familia (Valencia)</option>
+                <option value="Colegio Nuestra Señora de los Dolores (Benidorm)">Colegio Nuestra Señora de los Dolores (Benidorm)</option>
+                <option value="Col·legi San José (Tavernes de la Valldigna)">Col·legi San José (Tavernes de la Valldigna)</option>
+                <option value="Colegio San José (La Pobla de Vallbona)">Colegio San José (La Pobla de Vallbona)</option>
+                <option value="Col·legi Sagrada Familia (Cornellà)">Col·legi Sagrada Familia (Cornellà)</option>
             </select>
         <label for="horascontrato">Horas según contrato:</label>
             <input type="number" id="horascontrato" class="text" name="horascontrato"  required>
@@ -193,8 +202,8 @@ text-align: center;
         <h2>Horarios Especiales</h2>
             <div id="specialSchedule">
                 <div id="unusualSchedule">
-                    <button type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
-                    <p>El horario excepcional se añade al horario normal correspondiente al día de la semana.</p>
+                    <button title="El horario excepcional se añade al horario normal correspondiente al día de la semana."  type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
+                    <p></p>
                 </div>
                 <div id="holidaySchedule">
                     <button type="button" id="addHoliday" onclick="addHolidayInterval()">Agregar Festivos</button>
@@ -203,6 +212,7 @@ text-align: center;
             <h2>Calcular totales</h2>
             
             <button type="submit">Calcular Horas</button>
+            <div id="results">
             <p id="total_hours"> </p>
             <h1>Tabla de Horarios</h1>
     <table id="scheduleTable">
@@ -219,7 +229,8 @@ text-align: center;
     </table>
 
     <!-- <button id="download-btn-html">Descargar Tabla HTML</button> -->
-    <button id="download-btn-odt">Descargar ODT</button>
+    <button type="submit" id="download-btn-odt">Descargar ODT</button>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -277,7 +288,7 @@ text-align: center;
                 var url = URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url;
-                a.download = 'tabla_editable.odt';
+                a.download = 'Registro jornada laboral(' +  name + ' - ' + daterange + ').odt';
                 a.click();
                 URL.revokeObjectURL(url);
             })
@@ -454,14 +465,14 @@ text-align: center;
             startTimeInput.type = 'time';
             startTimeInput.name = 'start-time';
             startTimeInput.required = true;
-            specificTimeDiv.appendChild(document.createTextNode(' Hora de inicio: '));
+            specificTimeDiv.appendChild(document.createTextNode(' Entrada: '));
             specificTimeDiv.appendChild(startTimeInput);
     
             const endTimeInput = document.createElement('input');
             endTimeInput.type = 'time';
             endTimeInput.name = 'end-time';
             endTimeInput.required = true;
-            specificTimeDiv.appendChild(document.createTextNode(' Hora de fin: '));
+            specificTimeDiv.appendChild(document.createTextNode(' Salida: '));
             specificTimeDiv.appendChild(endTimeInput);
             
             specificTimeDiv.appendChild(addDeleteButton());
@@ -577,7 +588,8 @@ text-align: center;
 
                         tableBody.appendChild(row);
                     });
-                document.getElementById('scheduleTable').style.display = 'table';
+                //document.getElementById('scheduleTable').style.display = 'table';
+                document.getElementById('results').style.display = 'block';
                 })
                 .catch(error => console.error('Error:', error));
         });
