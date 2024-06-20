@@ -140,7 +140,7 @@ button[type="submit"]:hover {
     background-color: #0056b3;
 }
 
-p#total_hours {
+p#ptotalhours {
 font-size: 150%;
 background-color: #f2f2f2;
 width: 40%;
@@ -213,7 +213,7 @@ text-align: center;
             
             <button type="submit">Calcular Horas</button>
             <div id="results">
-            <p id="total_hours"> </p>
+            <p id="ptotalhours">Es total de horas trabajadas es <span id="total_hours"></span> </p>
             <h1>Tabla de Horarios</h1>
     <table id="scheduleTable">
         <thead>
@@ -268,6 +268,8 @@ text-align: center;
             const empresa = document.querySelector(`select[name="empresa"]`).value;
             const horascontrato = document.querySelector(`input[name="horascontrato"]`).value;
             const daterange = document.querySelector(`input[name="date-range"]`).value;
+            const totalhours = document.getElementById('total_hours').textContent;
+            console.log(totalhours)
 
             // Enviar los datos de la tabla al backend
             fetch('/descargar_tabla_odt', {
@@ -275,7 +277,14 @@ text-align: center;
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name: name, empresa: empresa, horascontrato: horascontrato, daterange: daterange, tableHtml: tableHtml })
+                body: JSON.stringify({
+                    name: name,
+                    empresa: empresa,
+                    horascontrato: horascontrato,
+                    daterange: daterange,
+                    tableHtml: tableHtml,
+                    totalhours: totalhours
+                    })
             })
             .then(response => {
                 if (response.ok) {
@@ -549,7 +558,12 @@ text-align: center;
             });
 
 
+            function convertMinutesToHHMM(minutos) {
+                var horas = Math.floor(minutos / 60);
+                var minutosRestantes = minutos % 60;
 
+                return horas + ":" + (minutosRestantes < 10 ? '0' : '') + minutosRestantes;
+            }
 
 
             fetch('/process', {
@@ -563,7 +577,7 @@ text-align: center;
             .then(data => {
 
                     const totalHours = document.querySelector('#total_hours');
-                    totalHours.textContent = 'El total de horas trabajadas es: ' + data.total_hours;
+                    totalHours.textContent = convertMinutesToHHMM(data.total_minutes);
 
 
                     const tableBody = document.querySelector('#scheduleTable tbody');
@@ -583,7 +597,7 @@ text-align: center;
                         row.appendChild(intervalsCell);
 
                         const valueCell = document.createElement('td');
-                        valueCell.textContent = item[2];
+                        valueCell.textContent = convertMinutesToHHMM(item[2]);
                         row.appendChild(valueCell);
 
                         tableBody.appendChild(row);

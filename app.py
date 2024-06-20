@@ -36,6 +36,7 @@ def descargar_tabla_odt():
     empresa = data.get('empresa', '')
     horascontrato = data.get('horascontrato', '')
     date_range = str(data.get('daterange', ''))
+    total_hours = str(data.get('totalhours', ''))
 
 
     # Crear un archivo ODT con la tabla de tres columnas
@@ -126,7 +127,7 @@ def descargar_tabla_odt():
             row.addElement(table_cell)
 
     # Sumamos el contenido de todas las celdas de la tercera columnas
-
+    ''' No es necesario, recibimos el total de horas ya calculado
     total_hours = 0
     saltar_primera_linea = True
     for row in table.getElementsByType(TableRow):
@@ -136,8 +137,9 @@ def descargar_tabla_odt():
             if cell_content is not None and not saltar_primera_linea:
                 total_hours += float(cell_content.firstChild.data)
         saltar_primera_linea = False
+    '''
 
-    odt_file.text.addElement(H(outlinelevel=4, text="Horas totales: " + str(round(total_hours, 2))))
+    odt_file.text.addElement(H(outlinelevel=4, text="Horas totales: " + str(total_hours)))
 
     odt_file.save("/tmp/Registro_jornada_laboral.odt")
 
@@ -193,7 +195,7 @@ def process():
     #print(unusuals)
 
 
-    total_hours = 0
+    total_minutes = 0
     current_date = start_date
     table_sumary = []
     while current_date <= end_date:
@@ -206,13 +208,13 @@ def process():
 
         if day_of_week in schedule and not current_date_is_holiday:
             table_today = [f'{current_date.day}/{meses[current_date.month]}/{current_date.year}',[],0]
-            total_hours_today = 0
+            total_minutes_today = 0
             for interval in schedule[day_of_week]:
                 entry_time = datetime.strptime(interval['entry'], '%H:%M')
                 exit_time = datetime.strptime(interval['exit'], '%H:%M')
                 table_today[1].append([entry_time.strftime('%-H:%M'),exit_time.strftime('%-H:%M')])
-                work_hours = (exit_time - entry_time).seconds / 3600
-                total_hours_today += work_hours
+                work_minutes = (exit_time - entry_time).seconds / 60
+                total_minutes_today += work_minutes
 
 
             for unusual_date in unusuals:
@@ -221,18 +223,18 @@ def process():
                     entry_time = datetime.strptime(unusual_date['start_time'], '%H:%M')
                     exit_time = datetime.strptime(unusual_date['end_time'], '%H:%M')
                     table_today[1].append([entry_time.strftime('%-H:%M'),exit_time.strftime('%-H:%M')])
-                    work_hours = (exit_time - entry_time).seconds / 3600
-                    total_hours_today += work_hours
+                    work_minutes = (exit_time - entry_time).seconds / 60
+                    total_minutes_today += work_minutes
 
 
 
 
-            table_today[2] += round(total_hours_today, 2)
-            total_hours = round(total_hours + total_hours_today, 2)
-            if total_hours_today > 0:
+            table_today[2] += round(total_minutes_today, 2)
+            total_minutes = round(total_minutes + total_minutes_today, 2)
+            if total_minutes_today > 0:
                 table_sumary.append(table_today)
         current_date += timedelta(days=1)
-    #table_sumary.append(['Total de horas trabajadas en el período: ',[],round(total_hours, 2)])
+    #table_sumary.append(['Total de horas trabajadas en el período: ',[],round(total_minutes, 2)])
 
 
     '''print('TABLA RESUMEN')
@@ -244,10 +246,10 @@ def process():
         print('Total del dia: ', f'{int((day[2] * 60) // 60)}:{int((day[2] * 60) % 60)}')
     print(table_sumary)'''
 
-    return jsonify({'total_hours': total_hours, 'table_sumary':table_sumary})
+    return jsonify({'total_minutes': total_minutes, 'table_sumary':table_sumary})
 
 if __name__ == '__main__':
     # Activar si se ejecuta en local
-    #webbrowser.open('http://127.0.0.1:5000/')
+    webbrowser.open('http://127.0.0.1:5000/')
 
     app.run(debug=True)
