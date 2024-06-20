@@ -4,8 +4,7 @@ from odf.opendocument import OpenDocumentText
 from odf.text import P, H
 from odf.table import Table, TableRow, TableCell, TableColumn
 from odf.style import Style, TextProperties, TableColumnProperties, TableRowProperties, TableCellProperties
-import re
-import webbrowser
+import re, webbrowser, json
 
 app = Flask(__name__)
 
@@ -26,6 +25,23 @@ def is_date_in_range(date_str, date_range):
 
     # Verificar si la fecha está en el rango
     return start_date <= date_str <= end_date
+
+@app.route('/subir_datos', methods=['POST'])
+def subir_datos():
+    contenido = request.data.decode('utf-8')  # Obtener el contenido del archivo enviado desde el frontend
+    return contenido
+    #return jsonify(contenido)
+
+@app.route('/descargar_formulario', methods=['POST'])
+def descargar_datos_formulario():
+    data = request.get_json()
+
+    # Guardar los datos JSON en un archivo de texto
+    with open("/tmp/datos_formulario.txt", "w") as file:
+        json.dump(data, file)
+
+    # Enviar el archivo de texto como respuesta para descargar
+    return send_file("/tmp/datos_formulario.txt", as_attachment=True)
 
 
 @app.route('/descargar_tabla_odt', methods=['POST'])

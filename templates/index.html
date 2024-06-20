@@ -94,8 +94,32 @@ form h2 {
     margin-left: 10px; /* Añadir un margen izquierdo para separar los botones */
 }
 
+
+
 .add-interval:hover, #addUnusual:hover, #addHoliday:hover {
-    background-color: #45a049;
+    background-color: #45A049;
+}
+
+
+#upload-form-btn, #download-form-btn{
+    background-color: #FFA500;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px; /* Añadir un margen izquierdo para separar los botones */
+}
+
+/*
+#upload-form-input {
+    display: none; /* Ocultar el input */
+}
+*/
+
+#upload-form-btn:hover, #download-form-btn:hover {
+    background-color: #D89111;
 }
 
 #specialSchedule, #holidaySchedule {
@@ -105,6 +129,7 @@ form h2 {
 
 div#results {
 display:none;
+margin-top: 10px;
 }
 
 
@@ -151,6 +176,13 @@ text-align: center;
 </head>
 <body>
     <h1>Generador de Registro de jornada laboral</h1>
+
+    <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
+        <button id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
+        <input  type="file" id="upload-form-input" name="upload-form-btn">
+        <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
+    </form>
+
     <form id="workForm">
         <label for="name">Nombre:</label>
             <input type="text" id="name" class="text" name="name"  required>
@@ -209,11 +241,18 @@ text-align: center;
                     <button type="button" id="addHoliday" onclick="addHolidayInterval()">Agregar Festivos</button>
                 </div>
             </div>
+
+            <h2>Exportar los datos del formulario.</h2>
+
+            <button id="download-form-btn" title="Descargar un fichero con los datos introducidos en el formulario.">Exportar horario</button><br>
+
+
+
             <h2>Calcular totales</h2>
-            
-            <button type="submit">Calcular Horas</button>
+            <button title="Genera la tabla de horas trabajadas." type="submit">Calcular Horas</button>
             <div id="results">
-            <p id="ptotalhours">Es total de horas trabajadas es <span id="total_hours"></span> </p>
+            <button title="Descargar la tabla de horas trabajadas en un documento para imprimir." type="submit" id="download-odt-btn">Imprimir tabla</button>
+            <p id="ptotalhours">El total de horas trabajadas es <span id="total_hours"></span> </p>
             <h1>Tabla de Horarios</h1>
     <table id="scheduleTable">
         <thead>
@@ -228,8 +267,6 @@ text-align: center;
         </tbody>
     </table>
 
-    <!-- <button id="download-btn-html">Descargar Tabla HTML</button> -->
-    <button type="submit" id="download-btn-odt">Descargar ODT</button>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -237,6 +274,23 @@ text-align: center;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
 
     <script>
+
+
+    /*
+
+    // Pulsar el botón upload-form-btn equivale a pulsar el upload-form-btn que está oculto
+
+    document.getElementById('upload-form-btn').addEventListener('click', function() {
+            document.getElementById('upload-form-input').click();
+        });
+
+
+    // Envio automático cuando seleccionamos un fichero en upload-form-input
+    document.getElementById('upload-form-input').addEventListener('change', function() {
+            document.getElementById('importexport').submit();
+        });
+
+    */
     /*
     document.getElementById('download-btn-html').addEventListener('click', function() {
         // Obtener los datos de la tabla
@@ -262,16 +316,69 @@ text-align: center;
 </script>
 
 <script>
-        document.getElementById('download-btn-odt').addEventListener('click', function() {
+
+
+        document.getElementById('download-form-btn').addEventListener('click', function() {
+
+            // Recopila los datos del formulario y los manda al backend para que los devuelva en json y poder guardarlos en un fichero.
+            const name = document.querySelector(`input[name="name"]`).value;
+            const empresa = document.querySelector(`select[name="empresa"]`).value;
+            const horascontrato = document.querySelector(`input[name="horascontrato"]`).value;
+            const daterange = document.querySelector(`input[name="date-range"]`).value;
+
+            const schedule = makeSchedule();
+            const holidays = makeHolidays();
+            const unusuals = makeUnusuals();
+
+            // Enviar los datos de la tabla al backend
+
+            fetch('/descargar_formulario', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    // name: name,
+                    empresa: empresa,
+                    horascontrato: horascontrato,
+                    daterange: daterange,
+                    schedule: schedule,
+                    holidays: holidays,
+                    unusuals: unusuals
+                    })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Error al descargar el archivo.');
+            })
+            .then(blob => {
+                // Crear un enlace de descarga para el archivo JSON
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'Datos registro jornada laboral.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+
+        });
+
+        document.getElementById('download-odt-btn').addEventListener('click', function() {
             var tableHtml = document.getElementById('scheduleTable').outerHTML;
             const name = document.querySelector(`input[name="name"]`).value;
             const empresa = document.querySelector(`select[name="empresa"]`).value;
             const horascontrato = document.querySelector(`input[name="horascontrato"]`).value;
             const daterange = document.querySelector(`input[name="date-range"]`).value;
             const totalhours = document.getElementById('total_hours').textContent;
-            console.log(totalhours)
 
             // Enviar los datos de la tabla al backend
+
             fetch('/descargar_tabla_odt', {
                 method: 'POST',
                 headers: {
@@ -358,14 +465,14 @@ text-align: center;
             return deleteButton;
         }
         
-        function addInterval(day) {
+        function addInterval(day, entry, exit) {
             
             const container = document.getElementById(day);
             const intervalDiv = document.createElement('div');
             intervalDiv.className = 'interval';
             
-            const entrySelect = createTimeInput('entry', day);
-            const exitSelect = createTimeInput('exit', day);
+            const entrySelect = createTimeInput('entry', day, entry);
+            const exitSelect = createTimeInput('exit', day, exit);
             
             /*const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Eliminar este intervalo';
@@ -388,12 +495,13 @@ text-align: center;
             container.appendChild(intervalDiv);
         }
         
-        function createTimeInput(type, day) {
+        function createTimeInput(type, day, value) {
             const timeInput = document.createElement('input');
             timeInput.className = 'timepicker';
             timeInput.type = 'time';
             timeInput.name = `${day}-${type}`;
             timeInput.required = true;
+            timeInput.value = value;
             
             return timeInput;
         
@@ -421,7 +529,7 @@ text-align: center;
             return select;
         }*/
         
-        function addHolidayInterval() {
+        function addHolidayInterval(range="") {
             const specialSchedule = document.getElementById('holidaySchedule');
             const holidayDiv = document.createElement('div');
             holidayDiv.className = 'interval';
@@ -431,6 +539,7 @@ text-align: center;
             dateRangeInput.name = 'holiday-range';
             dateRangeInput.className= 'date-range';
             dateRangeInput.required = true;
+            dateRangeInput.value = range;
             holidayDiv.appendChild(document.createTextNode('Rango de fechas festivas: '));
             holidayDiv.appendChild(dateRangeInput);
             
@@ -458,7 +567,7 @@ text-align: center;
             });
         }
         
-        function addUnusualTime() {
+        function addUnusualTime(date, start_time, end_time) {
             const specialSchedule = document.getElementById('unusualSchedule');
             const specificTimeDiv = document.createElement('div');
             specificTimeDiv.className = 'interval';
@@ -466,6 +575,8 @@ text-align: center;
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
             dateInput.name = 'specific-date';
+            console.log("Fecha incorporada: " + date)
+            dateInput.value = date;
             dateInput.required = true;
             specificTimeDiv.appendChild(document.createTextNode('Fecha: '));
             specificTimeDiv.appendChild(dateInput);
@@ -473,6 +584,7 @@ text-align: center;
             const startTimeInput = document.createElement('input');
             startTimeInput.type = 'time';
             startTimeInput.name = 'start-time';
+            startTimeInput.value = start_time;
             startTimeInput.required = true;
             specificTimeDiv.appendChild(document.createTextNode(' Entrada: '));
             specificTimeDiv.appendChild(startTimeInput);
@@ -480,6 +592,7 @@ text-align: center;
             const endTimeInput = document.createElement('input');
             endTimeInput.type = 'time';
             endTimeInput.name = 'end-time';
+            endTimeInput.value = end_time;
             endTimeInput.required = true;
             specificTimeDiv.appendChild(document.createTextNode(' Salida: '));
             specificTimeDiv.appendChild(endTimeInput);
@@ -493,6 +606,7 @@ text-align: center;
             flatpickr(dateInput, {
                 mode: "single",
                 dateFormat: "d/m/Y",
+
                 locale: {
                     rangeSeparator: " hasta ",
                     firstDayOfWeek: 1, // Establece que la semana comience en lunes
@@ -506,20 +620,16 @@ text-align: center;
                     }
                 }
 
+
             });
         }
 
-        document.getElementById('workForm').addEventListener('submit', function(e) {
-            e.preventDefault();
 
-            const dateRange = document.getElementById('date-range').value.split(" hasta ");
-            const start_date = dateRange[0];
-            const end_date = dateRange[1];
+        function makeSchedule() {
+            // Procesa el horario regular
 
             const schedule = {};
 
-            // Procesa la fecha de inicio, la de final y el horario regular
-            
             document.querySelectorAll('.day').forEach(day => {
                 const dayName = day.id;
                 schedule[dayName] = [];
@@ -529,22 +639,39 @@ text-align: center;
                     schedule[dayName].push({ entry, exit });
                 });
             });
-            
-            
-            // Manda los festivos al programa Python
-            
+
+            return schedule;
+        }
+
+        function makeDateRange() {
+
+            const dateRange = document.getElementById('date-range').value.split(" hasta ");
+
+            return dateRange;
+        }
+
+
+        function makeHolidays() {
+
+            // Procesa los festivos
+
             const holidays = [];
-            
+
             const holidaysSchedule = document.getElementById('holidaySchedule');
             holidaysSchedule.querySelectorAll('.date-range').forEach(holidayRange => {
                 const dateRange = holidayRange.value.split(" hasta ");
                 const start_date = dateRange[0];
                 const end_date = dateRange[1];
                 holidays.push([start_date , end_date]);
-                
+
             });
 
-            // Manda los horarios excepcionales al programa Python
+            return holidays;
+
+        }
+
+        function makeUnusuals() {
+            // Procesa los horarios excepcionales
 
             const unusuals = [];
             const unusualSchedule = document.getElementById('unusualSchedule');
@@ -557,13 +684,31 @@ text-align: center;
                 unusuals.push({ date, start_time, end_time });
             });
 
+            return unusuals;
+        }
 
-            function convertMinutesToHHMM(minutos) {
+        function convertMinutesToHHMM(minutos) {
+            // Convierte la cantidad minutos en un texto con el formato HH:MM
+
                 var horas = Math.floor(minutos / 60);
                 var minutosRestantes = minutos % 60;
 
                 return horas + ":" + (minutosRestantes < 10 ? '0' : '') + minutosRestantes;
             }
+
+
+
+
+        document.getElementById('workForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const dateRange = makeDateRange();
+            const start_date = dateRange[0];
+            const end_date = dateRange[1];
+            const schedule = makeSchedule();
+            const holidays = makeHolidays();
+            const unusuals = makeUnusuals();
+
 
 
             fetch('/process', {
@@ -607,6 +752,111 @@ text-align: center;
                 })
                 .catch(error => console.error('Error:', error));
         });
+
+
+        document.getElementById('importexport').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const fileInput = document.getElementById('upload-form-input');
+    const file = fileInput.files[0]; // Obtener el primer archivo seleccionado
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const contenido = event.target.result;
+
+            // Enviar el contenido del archivo al backend
+            fetch('/subir_datos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: contenido
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('empresa').value = data["empresa"];
+                document.getElementById('horascontrato').value = data["horascontrato"];
+                document.getElementById('date-range').value = data["daterange"];
+
+                // Seleccionar todos los elementos <div> con la clase "interval"
+                const elementosInterval = document.querySelectorAll('div.interval');
+
+                // Recorrer y eliminar cada elemento
+                elementosInterval.forEach(elemento => {
+                elemento.remove();
+                });
+
+
+
+                // Procesando Schedule
+                for (const day in data["schedule"]) {
+                    const intervals = data["schedule"][day];
+                    for (let i = 0; i < intervals.length; i++) {
+                        const entry = intervals[i].entry;
+                        const exit = intervals[i].exit;
+                        addInterval(day, entry,exit);
+                    }
+                }
+
+
+                // Procesando unusuals
+                /*
+                console.log(data["unusuals"]);
+
+                for (let i = 0; i < data["unusuals"].length; i++) {
+                    const unusual = data["unusuals"][i];
+
+                    const date = unusual.date;
+                    const start_time = unusual.start_time;
+                    const end_time = unusual.end_time;
+                    console.log("Date: " + date);
+                    let partesFecha = date.split('/');
+                    console.log("partesFecha: " + partesFecha);
+                    let fechaConvertida = partesFecha[2] + '-' + partesFecha[1] + '-' + partesFecha[0];
+                    console.log("fechaConvertida: " + fechaConvertida);
+                    console.log("Date: " + date);
+                    addUnusualTime(fechaConvertida, start_time, end_time);
+
+
+
+                }
+                */
+
+
+
+                // Procesando holidays
+                //console.log(data["holidays"]);
+                for (let i = 0; i < data["holidays"].length; i++) {
+                    //console.log("holiday: " + data["holidays"][i])
+                    const interval = data["holidays"][i];
+                    //console.log("interval: " + interval)
+                    var start = interval[0];
+                    var end = interval[1];
+
+                    if (end == null) {
+                        end = start;
+                    }
+
+                    //console.log("start: " + start + " - " + "end: " + end);
+                    addHolidayInterval(start + " hasta " + end);
+
+
+                }
+
+
+
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        reader.readAsText(file); // Leer el contenido del archivo como texto
+    } else {
+        console.log('No se ha seleccionado ningún archivo.');
+    }
+});
+
+
         
 
     </script>
