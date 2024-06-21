@@ -114,7 +114,7 @@ form h2 {
 
 /*
 #upload-form-input {
-    display: none; /* Ocultar el input */
+    display: none;
 }
 */
 
@@ -178,7 +178,7 @@ text-align: center;
     <h1>Generador de Registro de jornada laboral</h1>
 
     <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
-        <button id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
+        <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
         <input  type="file" id="upload-form-input" name="upload-form-btn">
         <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
     </form>
@@ -276,7 +276,8 @@ text-align: center;
     <script>
 
 
-    /*
+/*
+    // Si se activa la ocultación de Navega... devuelve una página en blanco.
 
     // Pulsar el botón upload-form-btn equivale a pulsar el upload-form-btn que está oculto
 
@@ -285,12 +286,13 @@ text-align: center;
         });
 
 
+
     // Envio automático cuando seleccionamos un fichero en upload-form-input
     document.getElementById('upload-form-input').addEventListener('change', function() {
             document.getElementById('importexport').submit();
         });
+*/
 
-    */
     /*
     document.getElementById('download-btn-html').addEventListener('click', function() {
         // Obtener los datos de la tabla
@@ -575,7 +577,7 @@ text-align: center;
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
             dateInput.name = 'specific-date';
-            console.log("Fecha incorporada: " + date)
+            //console.log("Fecha incorporada: " + date)
             dateInput.value = date;
             dateInput.required = true;
             specificTimeDiv.appendChild(document.createTextNode('Fecha: '));
@@ -775,6 +777,7 @@ text-align: center;
             })
             .then(response => response.json())
             .then(data => {
+
                 document.getElementById('empresa').value = data["empresa"];
                 document.getElementById('horascontrato').value = data["horascontrato"];
                 document.getElementById('date-range').value = data["daterange"];

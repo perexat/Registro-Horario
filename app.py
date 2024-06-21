@@ -29,6 +29,7 @@ def is_date_in_range(date_str, date_range):
 @app.route('/subir_datos', methods=['POST'])
 def subir_datos():
     contenido = request.data.decode('utf-8')  # Obtener el contenido del archivo enviado desde el frontend
+    print('-')
     return contenido
     #return jsonify(contenido)
 
@@ -222,15 +223,16 @@ def process():
             if is_date_in_range(current_date, holiday_range):
                 current_date_is_holiday = True
 
-        if day_of_week in schedule and not current_date_is_holiday:
+        if day_of_week in schedule:
             table_today = [f'{current_date.day}/{meses[current_date.month]}/{current_date.year}',[],0]
             total_minutes_today = 0
-            for interval in schedule[day_of_week]:
-                entry_time = datetime.strptime(interval['entry'], '%H:%M')
-                exit_time = datetime.strptime(interval['exit'], '%H:%M')
-                table_today[1].append([entry_time.strftime('%-H:%M'),exit_time.strftime('%-H:%M')])
-                work_minutes = (exit_time - entry_time).seconds / 60
-                total_minutes_today += work_minutes
+            if  not current_date_is_holiday:
+                for interval in schedule[day_of_week]:
+                    entry_time = datetime.strptime(interval['entry'], '%H:%M')
+                    exit_time = datetime.strptime(interval['exit'], '%H:%M')
+                    table_today[1].append([entry_time.strftime('%-H:%M'),exit_time.strftime('%-H:%M')])
+                    work_minutes = (exit_time - entry_time).seconds / 60
+                    total_minutes_today += work_minutes
 
 
             for unusual_date in unusuals:
@@ -268,4 +270,4 @@ if __name__ == '__main__':
     # Activar si se ejecuta en local
     webbrowser.open('http://127.0.0.1:5000/')
 
-    app.run(debug=True)
+    app.run(debug=False)
