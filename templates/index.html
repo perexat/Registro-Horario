@@ -174,6 +174,15 @@ width: 40%;
 margin-left: 30%;
 text-align: center;
 }
+#importadoHorario, #importadoFestivos, #compruebaDatos {
+display: none;
+background-color: #FF5F5F;
+color: #FFFFFF;
+border: 3px;
+width: 400px;
+padding: 5px;
+}
+
     </style>
 </head>
 <body>
@@ -181,11 +190,14 @@ text-align: center;
 
     <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
         <h2>Exportar o importar los datos del formulario.</h2>
-        <p>Se puede exportar el horario de trabajo a un fichero de texto, para poder importarlo más tarde y reutilizarlo en otro período</p>
+        <p>Se puede exportar el horario de trabajo a un fichero de texto, para poder importarlo más tarde y reutilizarlo para realizar el registro de jornada de otro período.</p>
         <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
         <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
         <input  type="file" id="upload-form-input" name="upload-form-btn"><br>
         <button id="download-form-btn" title="Descargar un fichero con los datos introducidos en el formulario.">Exportar horario</button>
+        <p id="importadoHorario">Se ha importado un horario.</p>
+        <p id="importadoFestivos">Se han importado festivos.</p>
+        <p id="compruebaDatos">Por favor, comprueba los datos del formulario.</p>
 
     </form>
 
@@ -810,6 +822,8 @@ text-align: center;
                 for (const day in data["schedule"]) {
                     // Limpieza de datos anteriores
                     if (data["schedule"][day].length !== 0) {
+                        document.getElementById('importadoHorario').style.display = 'block';
+                        document.getElementById('compruebaDatos').style.display = 'block';
                         // Seleccionar todos los elementos <div> con la clase "interval"
                         const elementosInterval = divSchedule.querySelectorAll('div.interval');
                         // Recorrer y eliminar cada elemento
@@ -858,6 +872,8 @@ text-align: center;
                 const divHolidays = document.getElementById("holidaySchedule");
                 // Limpieza de datos anteriores
                 if (data["holidays"].length !== 0) {
+                    document.getElementById('importadoFestivos').style.display = 'block';
+                    document.getElementById('compruebaDatos').style.display = 'block';
                     // Seleccionar todos los elementos <div> con la clase "interval"
                         const elementosInterval = divHolidays.querySelectorAll('div.interval');
                         // Recorrer y eliminar cada elemento
