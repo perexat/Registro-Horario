@@ -279,4 +279,4 @@ if __name__ == '__main__':
     # Activar si se ejecuta en local
     # webbrowser.open('http://127.0.0.1:5000/')
 
-    app.run(debug=True)
+    app.run(debug=False)
