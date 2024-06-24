@@ -268,7 +268,7 @@ padding: 5px;
 
 
             <h2>Generar e imprimir registros</h2>
-            <button title="Genera la tabla de horas trabajadas." type="submit">Generar registro de jornada</button>
+            <button title="Genera la tabla de horas trabajadas." type="submit">Previsualizar registro de jornada</button>
             <div id="results">
             <button title="Descargar la tabla de horas trabajadas en un documento para imprimir." type="submit" id="download-odt-btn">Imprimir registro de jornada</button>
             <p id="ptotalhours">El total de horas trabajadas es <span id="total_hours"></span> </p>
@@ -394,6 +394,13 @@ padding: 5px;
         });
 
         document.getElementById('download-odt-btn').addEventListener('click', function() {
+
+            // El "required" del rango de fechas parece no funcionar.
+            if (document.getElementById("date-range").value === "") {
+                //alert("Por favor, introduce un rango de fechas.");
+                return;
+                }
+
             var tableHtml = document.getElementById('scheduleTable').outerHTML;
             const name = document.querySelector(`input[name="name"]`).value;
             const empresa = document.querySelector(`select[name="empresa"]`).value;
@@ -730,10 +737,8 @@ padding: 5px;
             // El "required" del rango de fechas parece no funcionar.
             if (document.getElementById("date-range").value === "") {
                 alert("Por favor, introduce un rango de fechas.");
-
+                return;
                 }
-
-                console.log('kk');
 
 
             const dateRange = makeDateRange();
