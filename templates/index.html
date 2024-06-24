@@ -194,7 +194,7 @@ padding: 5px;
         <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
         <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
         <input  type="file" id="upload-form-input" name="upload-form-btn"><br>
-        <button id="download-form-btn" title="Descargar un fichero con los datos introducidos en el formulario.">Exportar horario</button>
+        <button id="download-form-btn" title="Descargar un fichero con los datos actualmente introducidos en el formulario.">Exportar horario</button>
         <p id="importadoHorario">Se ha importado un horario.</p>
         <p id="importadoFestivos">Se han importado festivos.</p>
         <p id="compruebaDatos">Por favor, comprueba los datos del formulario.</p>
@@ -339,6 +339,9 @@ padding: 5px;
 
 
         document.getElementById('download-form-btn').addEventListener('click', function() {
+
+            // Limpiamos el input de importación, prevenimos importación al enviar este formulario.
+            document.getElementById('upload-form-input').value = "";
 
             // Recopila los datos del formulario y los manda al backend para que los devuelva en json y poder guardarlos en un fichero.
             const name = document.querySelector(`input[name="name"]`).value;
