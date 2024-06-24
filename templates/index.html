@@ -109,7 +109,8 @@ form h2 {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-left: 10px; /* Añadir un margen izquierdo para separar los botones */
+    margin-left: 10px;
+    margin-bottom: 10px;
 }
 
 /*
@@ -120,6 +121,7 @@ form h2 {
 
 #upload-form-btn:hover, #download-form-btn:hover {
     background-color: #D89111;
+    margin-bottom: 10px;
 }
 
 #specialSchedule, #holidaySchedule {
@@ -178,9 +180,13 @@ text-align: center;
     <h1>Generador de Registro de jornada laboral</h1>
 
     <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
-        <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
-        <input  type="file" id="upload-form-input" name="upload-form-btn">
+        <h2>Exportar o importar los datos del formulario.</h2>
+        <p>Se puede exportar el horario de trabajo a un fichero de texto, para poder importarlo más tarde y reutilizarlo en otro período</p>
         <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
+        <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
+        <input  type="file" id="upload-form-input" name="upload-form-btn"><br>
+        <button id="download-form-btn" title="Descargar un fichero con los datos introducidos en el formulario.">Exportar horario</button>
+
     </form>
 
     <form id="workForm">
@@ -242,9 +248,9 @@ text-align: center;
                 </div>
             </div>
 
-            <h2>Exportar los datos del formulario.</h2>
 
-            <button id="download-form-btn" title="Descargar un fichero con los datos introducidos en el formulario.">Exportar horario</button><br>
+
+
 
 
 
@@ -788,16 +794,31 @@ text-align: center;
                 //document.getElementById('date-range').value = data["daterange"];
                 document.getElementById('date-range').value = "";
 
+
+                /*
                 // Seleccionar todos los elementos <div> con la clase "interval"
                 const elementosInterval = document.querySelectorAll('div.interval');
                 // Recorrer y eliminar cada elemento
                 elementosInterval.forEach(elemento => {
                 elemento.remove();
                 });
-
+                */
 
 
                 // Procesando Schedule
+                const divSchedule = document.getElementById("schedule");
+                for (const day in data["schedule"]) {
+                    // Limpieza de datos anteriores
+                    if (data["schedule"][day].length !== 0) {
+                        // Seleccionar todos los elementos <div> con la clase "interval"
+                        const elementosInterval = divSchedule.querySelectorAll('div.interval');
+                        // Recorrer y eliminar cada elemento
+                        elementosInterval.forEach(elemento => {
+                        elemento.remove();
+                        });
+                        }
+                }
+                // Añadir nuevos datos
                 for (const day in data["schedule"]) {
                     const intervals = data["schedule"][day];
                     for (let i = 0; i < intervals.length; i++) {
@@ -834,23 +855,31 @@ text-align: center;
 
 
                 // Procesando holidays
-                //console.log(data["holidays"]);
-                for (let i = 0; i < data["holidays"].length; i++) {
-                    //console.log("holiday: " + data["holidays"][i])
-                    const interval = data["holidays"][i];
-                    //console.log("interval: " + interval)
-                    var start = interval[0];
-                    var end = interval[1];
-
-                    if (end == null) {
-                        end = start;
-                    }
-
-                    //console.log("start: " + start + " - " + "end: " + end);
-                    addHolidayInterval(start + " hasta " + end);
-
-
+                const divHolidays = document.getElementById("holidaySchedule");
+                // Limpieza de datos anteriores
+                if (data["holidays"].length !== 0) {
+                    // Seleccionar todos los elementos <div> con la clase "interval"
+                        const elementosInterval = divHolidays.querySelectorAll('div.interval');
+                        // Recorrer y eliminar cada elemento
+                        elementosInterval.forEach(elemento => {
+                        elemento.remove();
+                        });
                 }
+
+                    for (let i = 0; i < data["holidays"].length; i++) {
+                        //console.log("holiday: " + data["holidays"][i])
+                        const interval = data["holidays"][i];
+                        //console.log("interval: " + interval)
+                        var start = interval[0];
+                        var end = interval[1];
+
+                        if (end == null) {
+                            end = start;
+                        }
+
+                        //console.log("start: " + start + " - " + "end: " + end);
+                        addHolidayInterval(start + " hasta " + end);
+                    }
 
 
 
