@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 from odf.opendocument import OpenDocumentText
 from odf.text import P, H
 from odf.table import Table, TableRow, TableCell, TableColumn
-from odf.style import Style, TextProperties, TableColumnProperties, TableRowProperties, TableCellProperties
-import re, webbrowser, json
+from odf.style import Style, TextProperties, TableCellProperties
+import re
+import webbrowser
+import json
 
 app = Flask(__name__)
 
@@ -18,7 +20,7 @@ def is_date_in_range(date_str, date_range):
     # Convertir la fecha y el rango de fechas de strings a objetos datetime
     #date = datetime.strptime(date_str, '%d/%m/%Y')
     start_date = datetime.strptime(date_range[0], '%d/%m/%Y')
-    if date_range[1] != None:
+    if date_range[1] is not None:
         end_date = datetime.strptime(date_range[1], '%d/%m/%Y')
     else:
         end_date = start_date
@@ -84,17 +86,19 @@ def descargar_tabla_odt():
 
     # Crear un estilo para el cuerpo de la tabla
     body_style = Style(name="BodyStyle", family="table-cell")
-    body_cell_props = TableCellProperties(backgroundcolor="#FFFFFF", border="0.5pt solid #000000")
+    body_cell_props = TableCellProperties(backgroundcolor="#FFFFFF", borderleft="0.1pt solid #000000", borderright="0.1pt solid #000000", borderbottom="0.1pt solid #000000")
     body_style.addElement(body_cell_props)
 
     # Agregar el estilo al documento
     odt_file.automaticstyles.addElement(header_style)
+    odt_file.automaticstyles.addElement(body_style)
 
 
     odt_file.text.addElement(H(outlinelevel=4, stylename=style1, text="Nombre: " + name))
     odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Empresa: " + empresa))
     odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Horas según contrato: " + horascontrato))
     odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Rango de fechas: " + date_range))
+    odt_file.text.addElement(H(outlinelevel=4, stylename=style2, text="Horas trabajadas: " + str(total_hours)))
 
     table = Table()
 
@@ -122,13 +126,18 @@ def descargar_tabla_odt():
                 for cell in cells:
                     if '<td>' in cell or '<th>' in cell:
                         #cell_content = cell.replace('<td>', '').strip()
-                        cell = cell.replace("<br>", "//")
+                        cell = cell.replace("<br>", "--")
                         cell_content = cleanhtml(cell)
+
+                        if cell_content[-2:] == "--": #Eliminar los dos últimos caracteres si son --
+                            cell_content = cell_content[:-2]
+
                         if table_section == thead:
                             table_cell = TableCell(stylename=header_style)
                         else:
                             table_cell = TableCell(stylename=body_style)
-                        for line in cell_content.split('//'):
+                        for line in cell_content.split('--'):
+                            print(cell_content)
                             paragraph = P(text=line)
                             table_cell.addElement(paragraph)
                         #table_cell.addElement(P(text=cell_content))
@@ -156,7 +165,7 @@ def descargar_tabla_odt():
         saltar_primera_linea = False
     '''
 
-    odt_file.text.addElement(H(outlinelevel=4, text="Horas totales: " + str(total_hours)))
+
 
     odt_file.save("/tmp/Registro_jornada_laboral.odt")
 
@@ -268,6 +277,6 @@ def process():
 
 if __name__ == '__main__':
     # Activar si se ejecuta en local
-    webbrowser.open('http://127.0.0.1:5000/')
+    # webbrowser.open('http://127.0.0.1:5000/')
 
-    app.run(debug=False)
+    app.run(debug=True)

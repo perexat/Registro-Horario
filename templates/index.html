@@ -756,6 +756,9 @@ text-align: center;
         });
 
 
+
+        // Importar horario desde un fichero de texto
+
         document.getElementById('importexport').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -780,11 +783,13 @@ text-align: center;
 
                 document.getElementById('empresa').value = data["empresa"];
                 document.getElementById('horascontrato').value = data["horascontrato"];
-                document.getElementById('date-range').value = data["daterange"];
+
+                // El intervalo generalmente será distinto, así que no se importa.
+                //document.getElementById('date-range').value = data["daterange"];
+                document.getElementById('date-range').value = "";
 
                 // Seleccionar todos los elementos <div> con la clase "interval"
                 const elementosInterval = document.querySelectorAll('div.interval');
-
                 // Recorrer y eliminar cada elemento
                 elementosInterval.forEach(elemento => {
                 elemento.remove();
