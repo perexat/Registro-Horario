@@ -25,7 +25,7 @@ location /registro-horario/ {
 
 
 location /static {
-        alias /var/www/Registro-Horario/static;  # Ruta absoluta a la carpeta static de tu proyecto Flask
+        alias /var/www/Registro-Horario/static;  # Ruta absoluta a la carpeta static del proyecto Flask
     }
 
 
@@ -41,6 +41,8 @@ Configuración de SYSTEMD
 ------------------------
 
 Añado el fichero /etc/systemd/system/registro-horario.service con el siguiente contenido:
+
+--------------------------------------
 [Unit]
 Description=Servidor Flask de Registro-Horario
 After=network.target
@@ -54,3 +56,10 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 
+-----------------------------
+
+Luego ejecutar
+sudo systemctl enable registro-horario
+
+Comprobar con
+sudo systemctl is-enabled registro-horario
