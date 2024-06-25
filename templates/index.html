@@ -77,6 +77,10 @@ form h2 {
     border: 1px solid #ccc;
 }
 
+#saturday, #sunday {
+display: none;
+}
+
 .day h3 {
     color: #333;
     margin-bottom: 5px;
@@ -247,6 +251,16 @@ padding: 5px;
             <div class="day" id="friday">
                 <h3>Viernes:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('friday')">Agregar Intervalo</button>
+                <br>
+            </div>
+            <div class="day" id="saturday">
+                <h3>Sábado:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('saturday')">Agregar Intervalo</button>
+                <br>
+            </div>
+            <div class="day" id="sunday">
+                <h3>Domingo:</h3>
+                <button type="button" class="add-interval" onclick="addInterval('sunday')">Agregar Intervalo</button>
                 <br>
             </div>
         </div>
