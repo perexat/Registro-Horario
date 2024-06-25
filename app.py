@@ -7,6 +7,8 @@ from odf.style import Style, TextProperties, TableCellProperties
 import re
 import webbrowser
 import json
+import random
+import os
 
 app = Flask(__name__)
 
@@ -176,10 +178,20 @@ def descargar_tabla_odt():
             table_cell.addElement(P(text=''))
             row.addElement(table_cell)
 
-    odt_file.save("/tmp/Registro_jornada_laboral.odt")
+    filename = "Registro_jornada_laboral.odt"
+    random_number = str(random.randint(11111, 99999))
+    random_filename = random_number + '_' + filename
+    random_file_path = "./temp_files/" + random_filename
+
+    odt_file.save(random_file_path)
+    response = send_file(
+        random_file_path,
+        as_attachment=True,
+        download_name=filename)
+    os.remove(random_file_path)
 
     # Enviar el archivo ODT como respuesta
-    return send_file("/tmp/Registro_jornada_laboral.odt", as_attachment=True)
+    return response
 
 
 @app.route('/')
