@@ -8,8 +8,12 @@ Configurarión de NGINX
 
 Añado al fichero de configuración /etc/nginx/sites-available/default las siguientes líneas:
 
+<<<<<<< HEAD
 ```
 location /registro-horar99999io/ {
+=======
+location /registro-horario/ {
+>>>>>>> e99b3f0cf2de59759744144d5910f9c962ac4003
 
         proxy_pass http://127.0.0.1:5000/;
         proxy_set_header Host $host;
@@ -23,16 +27,33 @@ location /registro-horar99999io/ {
         proxy_set_header X-Forwarded-Server $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+<<<<<<< HEAD
         }
+=======
+}
+>>>>>>> e99b3f0cf2de59759744144d5910f9c962ac4003
 
 
 location /static {
 
         alias /var/www/Registro-Horario/static;  # Ruta absoluta a la carpeta static del proyecto Flask
+<<<<<<< HEAD
         }
 
 
 location ~ /(process|descargar_tabla_odt|subir_datos|descargar_formulario) {
+=======
+}
+
+
+location ~ /(process|descargar_tabla_odt|subir_datos|descargar_formulario) {
+
+    proxy_pass http://127.0.0.1:5000/$1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+>>>>>>> e99b3f0cf2de59759744144d5910f9c962ac4003
 
         proxy_pass http://127.0.0.1:5000/$1;
         proxy_set_header Host $host;
