@@ -7,10 +7,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
     <style>
 
-    .deleteButton {
-        width: 20px;
-        vertical-align: middle;
+
+    .help {
+    border: 3px solid #00aaddff;
+    border-radius: 12px;
+    padding: 12px;
+    padding-left: 10px;
+    background-image: url("./static/img/Question.svg");
+    background-repeat: no-repeat;
+    background-size: 30px;
+    background-position: left center;
+    margin-bottom: 10px;
+    display: none;
+
+    }
+
+    .help p {
+    padding-left: 30px;
+    }
+
+    img#help {
+    width: 40px;
+    }
+
+    .deleteButton, .question {
+        width: 25px;
+        vertical-align: top;
         margin-left: 15px;
+
     }
 
 
@@ -192,11 +216,16 @@ padding: 5px;
 </head>
 <body>
     <h1>Generador de Registro de jornada laboral</h1>
+    <img id="help" src="./static/img/Question.svg">
 
     <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
         <h2>Exportar o importar los datos del formulario.</h2>
+        <div class="help">
         <p>Se puede exportar el horario de trabajo a un fichero de texto, para poder importarlo más tarde y reutilizarlo para realizar el registro de jornada de otro período.</p>
         <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
+        <p>La idea es introducir en el formulario nuestro horario habitual y los festivos del curso. Luego exportaremos estos datos a un fichero.</p> <p>Posteriormente podremos importar este fichero y solamente tendremos que introducir el rango de fechas a generar (por ejemplo un mes) y los horarios excepcionales durante ese período.</p>
+        </div>
+
         <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
         <input  type="file" id="upload-form-input" name="upload-form-btn"><br>
         <button id="download-form-btn" title="Descargar un fichero con los datos actualmente introducidos en el formulario.">Exportar horario</button>
@@ -267,11 +296,20 @@ padding: 5px;
         <h2>Horarios Especiales</h2>
             <div id="specialSchedule">
                 <div id="unusualSchedule">
-                    <button title="El horario excepcional se añade al horario normal correspondiente al día de la semana."  type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
-                    <p></p>
+                    <button type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
+                <div class="help">
+                <p>Un horario excepcional es aquel que no se corresponde con el horario de trabajo normal que se repite cada semana (una reunión de evaluación, una salida complementaria,...). Este horario excepcional se <strong>suma</strong> al horario normal correspondiente al día de la semana.</p>
+                <p>Si queremos <strong>sustituir</strong> nuestro horario habitual por un horario excepcional y no sumarlo, se recomienda eliminar el horario habitual de ese día haciéndolo constar como festivo.</p>
+                </div>
+
                 </div>
                 <div id="holidaySchedule">
                     <button type="button" id="addHoliday" onclick="addHolidayInterval()">Agregar Festivos</button>
+                    <div class="help">
+                        <p>Un festivo es una fecha o rango de fechas en las que no se realiza el horario de trabajo normal (si alguien descubre esto ahora, entenderá por qué el colegio estaba, en ocasiones, tan solitario &#128517;).</p>
+                        <p>Hay que pulsar sobre el primer día festivo y luego sobre el último. Par aseleccionar un solo día festivo hay que pulsar dos veces sobre él.</p>
+
+                    </div>
                 </div>
             </div>
 
@@ -282,9 +320,16 @@ padding: 5px;
 
 
             <h2>Generar e imprimir registros</h2>
-            <button title="Genera la tabla de horas trabajadas." type="submit">Previsualizar registro de jornada</button>
+            <button type="submit">Previsualizar registro de jornada</button>
+            <div class="help">
+            <p>"Previsualizar registro de jornada" muestra la tabla con el registro de jornada en esta misma página, y activa el botón para imprimirla.</p>
+            </div>
             <div id="results">
-            <button title="Descargar la tabla de horas trabajadas en un documento para imprimir." type="submit" id="download-odt-btn">Imprimir registro de jornada</button>
+            <button type="submit" id="download-odt-btn">Imprimir registro de jornada</button>
+            <div class="help">
+            <p>"Imprimir registro de jornada" permite descargar un fichero de texto ODT con el registro de jornada para imprimirlo.</p>
+            <p>El motivo por el que se genera un ODT editable y no un PDF es porque siempre cabe la posibilidad de que alguna situación excepcional no pueda registrarse con este cuestionario. En ese caso siempre podremos editar el documento "a mano".</p>
+            </div>
             <p id="ptotalhours">El total de horas trabajadas es <span id="total_hours"></span> </p>
             <h1>Tabla de Horarios</h1>
     <table id="scheduleTable">
@@ -407,6 +452,19 @@ padding: 5px;
 
         });
 
+
+        // Activar y desactivar las ayudas
+        document.getElementById('help').addEventListener('click', function() {
+            document.querySelectorAll('.help').forEach(helpdiv => {
+                if (helpdiv.style.display == 'block') {
+                    helpdiv.style.display = 'none';
+                } else {
+                    helpdiv.style.display = 'block';
+                }
+            });
+
+        });
+
         document.getElementById('download-odt-btn').addEventListener('click', function() {
 
             // El "required" del rango de fechas parece no funcionar.
@@ -501,7 +559,7 @@ padding: 5px;
         
         function addDeleteButton() {
             const deleteButton = document.createElement('img');
-            deleteButton.src = "{{ url_for('static', filename='img/delete.svg') }}"; // Ruta de la imagen que deseas utilizar
+            deleteButton.src = "{{ url_for('static', filename='img/Delete.svg') }}"; // Ruta de la imagen que deseas utilizar
             deleteButton.alt = 'Eliminar';
             deleteButton.className= 'deleteButton';
             deleteButton.addEventListener('click', function() {

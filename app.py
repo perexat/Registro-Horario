@@ -10,6 +10,7 @@ import json
 import random
 import os
 
+
 app = Flask(__name__)
 
 CLEANR = re.compile('<.*?>')
@@ -43,16 +44,29 @@ def subir_datos():
 def descargar_datos_formulario():
     data = request.get_json()
 
+    filename = "datos_formulario.txt"
+    random_number = str(random.randint(11111, 99999))
+    random_filename = random_number + '_' + filename
+    random_file_path = "./temp_files/" + random_filename
+
     # Guardar los datos JSON en un archivo de texto
-    with open("/tmp/datos_formulario.txt", "w") as file:
+    with open(random_file_path, "w") as file:
         json.dump(data, file)
 
+    # Crear la respuesta y borrar el fichero de texto
+    response = send_file(
+        random_file_path,
+        as_attachment=True,
+        download_name=filename)
+    os.remove(random_file_path)
+
     # Enviar el archivo de texto como respuesta para descargar
-    return send_file("/tmp/datos_formulario.txt", as_attachment=True)
+    return response
 
 
 @app.route('/descargar_tabla_odt', methods=['POST'])
 def descargar_tabla_odt():
+
     data = request.get_json()
     table_html = data.get('tableHtml', '')
     name = data.get('name', '')
@@ -60,6 +74,11 @@ def descargar_tabla_odt():
     horascontrato = data.get('horascontrato', '')
     date_range = str(data.get('daterange', ''))
     total_hours = str(data.get('totalhours', ''))
+
+    # Guardamos un pequeño registro de uso del programa
+    log_file = open('./temp_files/log.txt', 'a')
+    log_file.write(datetime.strftime(datetime.now(), "%d/%m/%y %H:%M") + ' - ' + empresa + '\n')
+    log_file.close()
 
     # Crear un archivo ODT con la tabla de tres columnas
     odt_file = OpenDocumentText()
