@@ -37,6 +37,11 @@
 
     }
 
+    .pasteButton, .copyButton {
+        width: 25px;
+        display: none;
+    }
+
 
     body {
     font-family: Arial, sans-serif;
@@ -104,6 +109,8 @@ form h2 {
 #saturday, #sunday {
 display: none;
 }
+
+
 
 .day h3 {
     color: #333;
@@ -212,21 +219,31 @@ width: 400px;
 padding: 5px;
 }
 
+p#enpruebas {
+color: red;
+border: 3px solid red;
+width: 80%;
+text-align: center;
+margin-left: 10%;
+}
+
     </style>
 </head>
 <body>
     <h1>Generador de Registro de jornada laboral</h1>
-    <img id="help" src="./static/img/Question.svg">
+
+    <img id="help" alt="Ayuda" src="./static/img/Question.svg">
 
     <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
         <h2>Exportar o importar los datos del formulario.</h2>
         <div class="help">
         <p>Se puede exportar el horario de trabajo a un fichero de texto, para poder importarlo más tarde y reutilizarlo para realizar el registro de jornada de otro período.</p>
-        <p>Aviso: Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios especiales.</p>
-        <p>La idea es introducir en el formulario nuestro horario habitual y los festivos del curso. Luego exportaremos estos datos a un fichero.</p> <p>Posteriormente podremos importar este fichero y solamente tendremos que introducir el rango de fechas a generar (por ejemplo un mes) y los horarios excepcionales durante ese período.</p>
+        <p>La idea es introducir en el formulario nuestro horario habitual y los festivos del curso. Luego exportaremos estos datos a un fichero. Posteriormente podremos importar este fichero y solamente tendremos que introducir el rango de fechas a generar (por ejemplo un mes o un trimestre) y los horarios excepcionales durante ese período.</p>
+        <p>Se puede importar el horario de trabajo y los festivos, pero <strong>no</strong> los horarios excepcionales.</p>
+        <p>Si alguien introduce todos los festivos del curso y deja el horario regular en blanco, este fichero exportado puede ser reutilizado por otras personas.</p>
         </div>
 
-        <button type="submit" id="upload-form-btn" for="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
+        <button type="submit" id="upload-form-btn" title="Cargar un fichero con los datos introducidos en el formulario.">Importar datos</button>
         <input  type="file" id="upload-form-input" name="upload-form-btn"><br>
         <button id="download-form-btn" title="Descargar un fichero con los datos actualmente introducidos en el formulario.">Exportar horario</button>
         <p id="importadoHorario">Se ha importado un horario.</p>
@@ -239,13 +256,14 @@ padding: 5px;
         <label for="name">Nombre:</label>
             <input type="text" id="name" class="text" name="name"  required>
         <label for="empresa">Empresa:</label>
-            <select id="empresa" id="empresa" name="empresa" required>
+            <select id="empresa" name="empresa" required>
+                <option value="">Selecciona una opción</option>
+                <option value="Col·legi Sagrada Familia (Cornellà)">Col·legi Sagrada Familia (Cornellà)</option>
+                <option value="Col·legi San José (Tavernes de la Valldigna)">Col·legi San José (Tavernes de la Valldigna)</option>
+                <option value="Colegio Nuestra Señora de los Dolores (Benidorm)">Colegio Nuestra Señora de los Dolores (Benidorm)</option>
                 <option value="Colegio Sagrado Corazón (Mislata)">Colegio Sagrado Corazón (Mislata)</option>
                 <option value="Colegio Sagrada Familia (Valencia)">Colegio Sagrada Familia (Valencia)</option>
-                <option value="Colegio Nuestra Señora de los Dolores (Benidorm)">Colegio Nuestra Señora de los Dolores (Benidorm)</option>
-                <option value="Col·legi San José (Tavernes de la Valldigna)">Col·legi San José (Tavernes de la Valldigna)</option>
                 <option value="Colegio San José (La Pobla de Vallbona)">Colegio San José (La Pobla de Vallbona)</option>
-                <option value="Col·legi Sagrada Familia (Cornellà)">Col·legi Sagrada Familia (Cornellà)</option>
             </select>
         <label for="horascontrato">Horas según contrato:</label>
             <input type="number" id="horascontrato" class="text" name="horascontrato"  required>
@@ -256,40 +274,59 @@ padding: 5px;
         <input type="text" id="date-range" class="date-range" name="date-range"  required>
         <br>
         <h2>Horario de Trabajo</h2>
+        <div class="help">
+        <p>El horario de trabajo normal es el que se repite todas las semanas.</p>
+        <p>Se pueden introducir varios intervalos horarios dejando "huecos" entre ellos si no forman parte de la jornada laboral.</p>
+        <p>Los botones <img alt="Copiar" src="./static/img/Copy.svg"> y <img alt="Pegar" src="./static/img/Paste.svg"> sirven para copiar y pegar todos los intervalos horarios del día.</p>
+        </div>
         <div id="schedule">
             <div class="day" id="monday">
                 <h3>Lunes:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('monday')">Agregar Intervalo</button>
+                <img class="copyButton" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
             <div class="day" id="tuesday">
                 <h3>Martes:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('tuesday')">Agregar Intervalo</button>
+                <img class="copyButton" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
             <div class="day" id="wednesday">
                 <h3>Miércoles:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('wednesday')">Agregar Intervalo</button>
+                <img class="copyButton" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
             <div class="day" id="thursday">
                 <h3>Jueves:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('thursday')">Agregar Intervalo</button>
+                <img class="copyButton" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
             <div class="day" id="friday">
                 <h3>Viernes:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('friday')">Agregar Intervalo</button>
+                <img class="copyButton" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
             <div class="day" id="saturday">
                 <h3>Sábado:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('saturday')">Agregar Intervalo</button>
+                <img class="copy" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
             <div class="day" id="sunday">
                 <h3>Domingo:</h3>
                 <button type="button" class="add-interval" onclick="addInterval('sunday')">Agregar Intervalo</button>
+                <img class="copyButton" alt="Copiar" onclick="copyDay(this)" src="./static/img/Copy.svg">
+                <img class="pasteButton" alt="Pegar" onclick="pasteDay(this)" src="./static/img/Paste.svg">
                 <br>
             </div>
         </div>
@@ -346,6 +383,9 @@ padding: 5px;
     </table>
 
     </div>
+     </form>
+    <p id="enpruebas">Aviso importante: En este momento el programa no ha sido probado suficientemente. Los datos que genera deben ser comprobados. Por favor, manda cualquier sugerencia o aviso a Pere en el colegio de Mislata.</p>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -393,9 +433,6 @@ padding: 5px;
         URL.revokeObjectURL(url);
     });
     */
-</script>
-
-<script>
 
 
         document.getElementById('download-form-btn').addEventListener('click', function() {
@@ -465,6 +502,10 @@ padding: 5px;
 
         });
 
+
+
+
+
         document.getElementById('download-odt-btn').addEventListener('click', function() {
 
             // El "required" del rango de fechas parece no funcionar.
@@ -515,9 +556,7 @@ padding: 5px;
                 console.error('Error:', error);
             });
         });
-    </script>
 
-    <script>
         flatpickr(".date-range", {
             mode: "range",
             dateFormat: "d/m/Y",
@@ -562,7 +601,14 @@ padding: 5px;
             deleteButton.src = "{{ url_for('static', filename='img/Delete.svg') }}"; // Ruta de la imagen que deseas utilizar
             deleteButton.alt = 'Eliminar';
             deleteButton.className= 'deleteButton';
-            deleteButton.addEventListener('click', function() {
+            deleteButton.addEventListener('click', function(event) {
+                // Desactivar el botón de copiar
+                console.log('--- ' + event.currentTarget.parentNode.parentNode.className);
+                if (event.currentTarget.parentNode.parentNode.className === 'day') {
+                    if (event.currentTarget.parentNode.parentNode.querySelectorAll('.interval').length === 1) { // Solamente queda uno, y lo vamos a eliminar.
+                        event.currentTarget.parentNode.parentNode.querySelector('.copyButton').style.display = 'none';
+                    }
+                }
                 deleteButton.parentNode.remove();
             });
             return deleteButton;
@@ -596,6 +642,9 @@ padding: 5px;
             
             
             container.appendChild(intervalDiv);
+
+            // Activar el botón de copiar
+            container.querySelector('.copyButton').style.display = 'inline';
         }
         
         function createTimeInput(type, day, value) {
@@ -1001,7 +1050,46 @@ padding: 5px;
 });
 
 
-        
+        var intervalosCopiados = []; // Esta variable contendrá los intervalos al usar el botón de copiar.
+
+        // Copiar horario diario
+        function copyDay(element) {
+            var day = element.parentNode;
+            var dayName = day.id;
+            var intervals = [];
+
+
+            day.querySelectorAll('.interval').forEach(interval => {
+                    const entry = interval.querySelector(`input[name="${dayName}-entry"]`).value;
+                    const exit = interval.querySelector(`input[name="${dayName}-exit"]`).value;
+                    intervals.push({ 'entry': entry, 'exit' : exit });
+                });
+            console.log(intervals);
+
+
+            document.querySelectorAll('.pasteButton').forEach(pasteButton => {
+                pasteButton.style.display = 'inline';
+            });
+
+            intervalosCopiados = intervals;
+
+        }
+
+        // Pegar horario diario
+
+        function pasteDay(element) {
+            var day = element.parentNode;
+            var dayName = day.id;
+            for (var i = 0; i < intervalosCopiados.length; i++) {
+                var entry = intervalosCopiados[i].entry;
+                var exit = intervalosCopiados[i].exit;
+                addInterval(dayName, entry, exit)
+
+            }
+
+
+
+        }
 
     </script>
 </body>
