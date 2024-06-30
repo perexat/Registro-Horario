@@ -853,21 +853,27 @@ margin-left: 10%;
         document.getElementById('workForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-
+            let alerta = false;
             // El "required" del rango de fechas parece no funcionar.
             if (document.getElementById("date-range").value === "") {
+                alerta = true;
                 alert("Por favor, introduce un rango de fechas.");
                 return;
                 }
 
             // El "required" de la fecha de los horarios especiales parece no funcionar.
             document.querySelectorAll('.flatpickr-input').forEach(holiday_date => {
-                if (holiday_date.value === "") {
+                if (holiday_date.value === "" && !alerta) {
                     alert("Por favor, comprueba que las fechas de los festivos y los horarios especiales se han introducido correctamente.");
+                    alerta = true;
                     return;
                 }
             });
 
+            // Por algún motivo misterioso, el return dentro del for anterior, no funciona. Detenemos la función si ha habido alertas.
+            if (alerta) {
+                return;
+            }
 
             const dateRange = makeDateRange();
             const start_date = dateRange[0];
