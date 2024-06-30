@@ -335,8 +335,8 @@ margin-left: 10%;
                 <div id="unusualSchedule">
                     <button type="button" id="addUnusual" onclick="addUnusualTime()">Agregar Horario Excepcional</button>
                 <div class="help">
-                <p>Un horario excepcional es aquel que no se corresponde con el horario de trabajo normal que se repite cada semana (una reunión de evaluación, una salida complementaria,...). Este horario excepcional se <strong>suma</strong> al horario normal correspondiente al día de la semana.</p>
-                <p>Si queremos <strong>sustituir</strong> nuestro horario habitual por un horario excepcional y no sumarlo, se recomienda eliminar el horario habitual de ese día haciéndolo constar como festivo.</p>
+                <p>Un horario excepcional es aquel que no se corresponde con el horario de trabajo normal que se repite cada semana (una reunión de evaluación, una salida complementaria,...). Este horario excepcional se <strong>añade</strong> al horario normal correspondiente al día de la semana.</p>
+                <p>Si queremos <strong>sustituir</strong> nuestro horario habitual por un horario excepcional en lugar de añadirlo, se recomienda eliminar el horario habitual de ese día haciéndolo constar como festivo.</p>
                 </div>
 
                 </div>
@@ -344,7 +344,7 @@ margin-left: 10%;
                     <button type="button" id="addHoliday" onclick="addHolidayInterval()">Agregar Festivos</button>
                     <div class="help">
                         <p>Un festivo es una fecha o rango de fechas en las que no se realiza el horario de trabajo normal (si alguien descubre esto ahora, entenderá por qué el colegio estaba, en ocasiones, tan solitario &#128517;).</p>
-                        <p>Hay que pulsar sobre el primer día festivo y luego sobre el último. Par aseleccionar un solo día festivo hay que pulsar dos veces sobre él.</p>
+                        <p>Hay que pulsar sobre el primer día festivo y luego sobre el último. Para seleccionar un solo día festivo hay que pulsar dos veces sobre él.</p>
 
                     </div>
                 </div>
@@ -860,6 +860,13 @@ margin-left: 10%;
                 alert("Por favor, introduce un rango de fechas.");
                 return;
                 }
+
+            // El "required" de la fecha de los horarios especiales parece no funcionar.
+            document.querySelectorAll('.flatpickr-input').forEach(holiday_date => {
+                if (holiday_date.value === "") {
+                    alert("Por favor, comprueba que las fechas de los festivos y los horarios especiales se han introducido correctamente.");
+                }
+            });
 
 
             const dateRange = makeDateRange();
