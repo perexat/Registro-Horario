@@ -602,8 +602,7 @@ margin-left: 10%;
             deleteButton.alt = 'Eliminar';
             deleteButton.className= 'deleteButton';
             deleteButton.addEventListener('click', function(event) {
-                // Desactivar el botón de copiar
-                console.log('--- ' + event.currentTarget.parentNode.parentNode.className);
+                // Desactivar el botón de copiar si no hay intervalos horarios
                 if (event.currentTarget.parentNode.parentNode.className === 'day') {
                     if (event.currentTarget.parentNode.parentNode.querySelectorAll('.interval').length === 1) { // Solamente queda uno, y lo vamos a eliminar.
                         event.currentTarget.parentNode.parentNode.querySelector('.copyButton').style.display = 'none';
@@ -865,6 +864,7 @@ margin-left: 10%;
             document.querySelectorAll('.flatpickr-input').forEach(holiday_date => {
                 if (holiday_date.value === "") {
                     alert("Por favor, comprueba que las fechas de los festivos y los horarios especiales se han introducido correctamente.");
+                    return;
                 }
             });
 
@@ -1073,7 +1073,8 @@ margin-left: 10%;
                 });
             console.log(intervals);
 
-
+            // Si intervalos copiados, activamos los botones de "pegar".
+            // No hay posibilidad de desactivar los botones de pegar una vez activados, ya que no se puede olvidar lo copiado.
             document.querySelectorAll('.pasteButton').forEach(pasteButton => {
                 pasteButton.style.display = 'inline';
             });
