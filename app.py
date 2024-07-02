@@ -9,6 +9,7 @@ import webbrowser
 import json
 import random
 import os
+import tempfile
 
 
 app = Flask(__name__)
@@ -43,11 +44,12 @@ def subir_datos():
 @app.route('/descargar_formulario', methods=['POST'])
 def descargar_datos_formulario():
     data = request.get_json()
+    temp_dir = tempfile.gettempdir()
 
     filename = "datos_formulario.txt"
     random_number = str(random.randint(11111, 99999))
     random_filename = random_number + '_' + filename
-    random_file_path = "./temp_files/" + random_filename
+    random_file_path = temp_dir + "/registro-horario/" + random_filename
 
     # Guardar los datos JSON en un archivo de texto
     with open(random_file_path, "w") as file:
@@ -76,7 +78,7 @@ def descargar_tabla_odt():
     total_hours = str(data.get('totalhours', ''))
 
     # Guardamos un pequeño registro de uso del programa
-    log_file = open('./temp_files/log.txt', 'a')
+    log_file = open('./logs/log.txt', 'a')
     log_file.write(datetime.strftime(datetime.now(), "%d/%m/%y %H:%M") + ' - ' + empresa + '\n')
     log_file.close()
 
@@ -200,7 +202,7 @@ def descargar_tabla_odt():
     filename = "Registro_jornada_laboral.odt"
     random_number = str(random.randint(11111, 99999))
     random_filename = random_number + '_' + filename
-    random_file_path = "./temp_files/" + random_filename
+    random_file_path = temp_dir + "/registro-horario/" + random_filename
 
     odt_file.save(random_file_path)
     response = send_file(
