@@ -45,11 +45,15 @@ def subir_datos():
 def descargar_datos_formulario():
     data = request.get_json()
     temp_dir = tempfile.gettempdir()
+    folder = temp_dir + "/registro-horario/"
+
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
     filename = "datos_formulario.txt"
     random_number = str(random.randint(11111, 99999))
     random_filename = random_number + '_' + filename
-    random_file_path = temp_dir + "/registro-horario/" + random_filename
+    random_file_path = folder + random_filename
 
     # Guardar los datos JSON en un archivo de texto
     with open(random_file_path, "w") as file:
@@ -78,8 +82,13 @@ def descargar_tabla_odt():
     total_hours = str(data.get('totalhours', ''))
 
     # Guardamos un pequeño registro de uso del programa
-    log_file = open('./logs/log.txt', 'a')
-    log_file.write(datetime.strftime(datetime.now(), "%d/%m/%y %H:%M") + ' - ' + empresa + '\n')
+    logs_folder = './logs'
+    if not os.path.exists(logs_folder):
+        os.makedirs(logs_folder)
+
+    log_file = open(logs_folder + 'log.txt', 'a')
+    formated_date = datetime.strftime(datetime.now(), "%d/%m/%y %H:%M")
+    log_file.write(formated_date + ' - ' + empresa + '\n')
     log_file.close()
 
     # Crear un archivo ODT con la tabla de tres columnas
@@ -198,6 +207,11 @@ def descargar_tabla_odt():
             table_cell = TableCell()
             table_cell.addElement(P(text=''))
             row.addElement(table_cell)
+
+    temp_dir = tempfile.gettempdir()
+    folder = temp_dir + "/registro-horario/"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
     filename = "Registro_jornada_laboral.odt"
     random_number = str(random.randint(11111, 99999))
