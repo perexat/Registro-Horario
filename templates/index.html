@@ -234,7 +234,7 @@ margin-left: 10%;
 
     <img id="help" alt="Ayuda" src="./static/img/Question.svg">
 
-    <form id="importexport" action="/subir_datos" method="post" enctype="multipart/form-data">
+    <form id="importexport" action="/registro_horario_subir_datos" method="post" enctype="multipart/form-data">
         <h2>Exportar o importar los datos del formulario.</h2>
         <div class="help">
         <p>Se puede exportar el horario de trabajo a un fichero de texto, para poder importarlo más tarde y reutilizarlo para realizar el registro de jornada de otro período.</p>
@@ -452,7 +452,7 @@ margin-left: 10%;
 
             // Enviar los datos de la tabla al backend
 
-            fetch('/descargar_formulario', {
+            fetch('/registro_horario_descargar_formulario', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -523,7 +523,7 @@ margin-left: 10%;
 
             // Enviar los datos de la tabla al backend
 
-            fetch('/descargar_tabla_odt', {
+            fetch('/registro_horario_descargar_tabla_odt', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -884,7 +884,7 @@ margin-left: 10%;
 
 
 
-            fetch('/process', {
+            fetch('/registro_horario_process', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -942,7 +942,7 @@ margin-left: 10%;
             const contenido = event.target.result;
 
             // Enviar el contenido del archivo al backend
-            fetch('/subir_datos', {
+            fetch('/registro_horario_subir_datos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

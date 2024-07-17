@@ -34,14 +34,14 @@ def is_date_in_range(date_str, date_range):
     return start_date <= date_str <= end_date
 
 
-@app.route('/subir_datos', methods=['POST'])
+@app.route('/registro_horario_subir_datos', methods=['POST'])
 def subir_datos():
     # Obtener el contenido del archivo enviado desde el frontend
     contenido = request.data.decode('utf-8')
     return contenido
 
 
-@app.route('/descargar_formulario', methods=['POST'])
+@app.route('/registro_horario_descargar_formulario', methods=['POST'])
 def descargar_datos_formulario():
     data = request.get_json()
     temp_dir = tempfile.gettempdir()
@@ -70,7 +70,7 @@ def descargar_datos_formulario():
     return response
 
 
-@app.route('/descargar_tabla_odt', methods=['POST'])
+@app.route('/registro_horario_descargar_tabla_odt', methods=['POST'])
 def descargar_tabla_odt():
 
     data = request.get_json()
@@ -234,7 +234,7 @@ def home():
     return render_template('index.html')
 
 
-@app.route('/process', methods=['POST'])
+@app.route('/registro_horario_process', methods=['POST'])
 def process():
     meses = {
         1: 'ene',
