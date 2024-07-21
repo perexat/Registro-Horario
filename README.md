@@ -31,7 +31,7 @@ location /static {
 }
 
 
-location ~ /(process|descargar_tabla_odt|subir_datos|descargar_formulario) {
+location ~ /(registro_horario_process|registro_horario_descargar_tabla_odt|registro_horario_subir_datos|registro_horario_descargar_formulario) {
 
         proxy_pass http://127.0.0.1:5000/$1;
         proxy_set_header Host $host;
@@ -39,12 +39,6 @@ location ~ /(process|descargar_tabla_odt|subir_datos|descargar_formulario) {
         proxy_set_header X-Forwarded-Proto $scheme;
 }
 
-location ~ /(process|descargar_tabla_odt|subir_datos|descargar_formulario) {
-    proxy_pass http://127.0.0.1:5000/$1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
 
 ```
 
