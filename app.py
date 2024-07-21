@@ -83,7 +83,6 @@ def descargar_tabla_odt():
 
     # Guardamos un pequeño registro de uso del programa
     logs_folder = './logs/'
-
     if not os.path.exists(logs_folder):
         os.makedirs(logs_folder)
 
